@@ -22,8 +22,21 @@
 // 
 namespace Autocore
 {
+	/// <summary>
+	/// Implicit execution context.
+	/// </summary>
+	/// <description>
+	/// This service abstracts access to the implicit execution context present
+	/// in the current thread/async continuation execution. The implicit context
+	/// stores the volatile container linked to a particular (sync or async) 
+	/// execution. 
+	/// </description>
 	public interface IImplicitContext : ISingletonDependency
 	{
+		/// <summary>
+		/// Gets or sets the volatile container for the current implicit execution context.
+		/// </summary>
+		/// <value>The container.</value>
 		IVolatileContainer Container { get; set; }
 	}
 }

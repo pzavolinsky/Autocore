@@ -22,10 +22,28 @@
 // 
 namespace Autocore
 {
+	/// <summary>
+	/// An IoC container abstraction with nested volatile and non-volatile
+	/// scopes.
+	/// </summary>
 	public interface IContainer : System.IDisposable
 	{
+		/// <summary>
+		/// Resolves an instance of the non-volatile service T.
+		/// </summary>
+		/// <typeparam name="T">The service type to be resolved.</typeparam>
 		T Resolve<T>() where T : INonVolatileDependency;
+
+		/// <summary>
+		/// Creates a nested non-volatile scope.
+		/// </summary>
+		/// <returns>The new non-volatile scope.</returns>
 		IContainer CreateScope();
+
+		/// <summary>
+		/// Creates a nested volatile scope.
+		/// </summary>
+		/// <returns>The new volatile scope.</returns>
 		IVolatileContainer CreateVolatileScope();
 	}
 }

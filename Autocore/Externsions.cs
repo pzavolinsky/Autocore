@@ -26,6 +26,13 @@ namespace Autocore
 {
 	public static class Extensions
 	{
+		/// <summary>
+		/// Executes the callback in a volatile scope tha is disposed after the execution.
+		/// </summary>
+		/// <returns>The value returned by callback.</returns>
+		/// <param name="container">Container instance.</param>
+		/// <param name="callback">Callback function to be executed in a volatile scope.</param>
+		/// <typeparam name="T">The return value type of callback.</typeparam>
 		public static T ExecuteInVolatileScope<T>(this IContainer container, Func<IVolatileContainer, T> callback)
 		{
 			using (var scope = new Implementation.ImplicitVolatileScope(container))
@@ -33,6 +40,12 @@ namespace Autocore
 				return callback(scope.Container);
 			}
 		}
+
+		/// <summary>
+		/// Executes the callback in a volatile scope tha is disposed after the execution.
+		/// </summary>
+		/// <param name="container">Container instance.</param>
+		/// <param name="callback">Callback function to be executed in a volatile scope.</param>
 		public static void ExecuteInVolatileScope(this IContainer container, Action<IVolatileContainer> callback)
 		{
 			using (var scope = new Implementation.ImplicitVolatileScope(container))

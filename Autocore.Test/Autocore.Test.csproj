@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6C2E8ECC-A9C1-4A2E-8D4E-6EA1F71B1126}</ProjectGuid>
+    <ProjectGuid>{124A6CE5-1EA3-4E97-B145-1DDC241CD0BC}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Autocore</RootNamespace>
-    <AssemblyName>Autocore</AssemblyName>
+    <RootNamespace>Autocore.Test</RootNamespace>
+    <AssemblyName>Autocore.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ProductVersion>12.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -36,28 +36,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.2.1409.1722\lib\net40\Moq.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Factory.cs" />
-    <Compile Include="Externsions.cs" />
-    <Compile Include="Volatile.cs" />
-    <Compile Include="Implementation\Container.cs" />
-    <Compile Include="IContainer.cs" />
-    <Compile Include="Implementation\ImplicitContext.cs" />
-    <Compile Include="IImplicitContext.cs" />
-    <Compile Include="Implementation\VolatileContainer.cs" />
-    <Compile Include="Implementation\VolatileContext.cs" />
-    <Compile Include="IVolatileContainer.cs" />
-    <Compile Include="IVolatileContext.cs" />
-    <Compile Include="IDependency.cs" />
-    <Compile Include="Implementation\Factory.cs" />
-    <Compile Include="Implementation\ImplicitVolatileScope.cs" />
-    <Compile Include="Implementation\ContainerBuilderExtensions.cs" />
+    <Compile Include="VolatileContextTest.cs" />
+    <Compile Include="TestBase.cs" />
+    <Compile Include="ContainerTest.cs" />
+    <Compile Include="VolatileContainerTest.cs" />
+    <Compile Include="ImplicitVolatileScopeTest.cs" />
+    <Compile Include="VolatileTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Implementation\" />
+    <ProjectReference Include="..\Autocore\Autocore.csproj">
+      <Project>{6C2E8ECC-A9C1-4A2E-8D4E-6EA1F71B1126}</Project>
+      <Name>Autocore</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

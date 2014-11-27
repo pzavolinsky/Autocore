@@ -22,14 +22,72 @@
 // 
 namespace Autocore
 {
+	/// <summary>
+	/// Singleton volatile accessor.
+	/// </summary>
+	/// <description>
+	/// Volatile dependencies are services that are only valid for a brief period
+	/// of time. That is, volatile dependencies exist within a volatile scope.
+	/// 
+	/// Volatile scopes can be created on a per-execution-context basis (e.g. 
+	/// per-request, per-thread, per-async call, etc.) allowing different executions
+	/// of singleton instances to see different volatile values.
+	/// 
+	/// A singleton service that requires access to a volatile service needs to take
+	/// a dependency on Volatile<IMyService> instead of directly on IMyService because
+	/// the singleton will be called many times with different IMyService instances.
+	/// </description>
+	/// <remarks>
+	/// A singleton's constructor and its methods will be executed in different
+	/// execution contexts (i.e. the ctor will be called once during app initialization
+	/// and the methods will be called many times to respond to external events). Because
+	/// of this a singleton SHOULD NOT use the Value acccessor of a Volatile in its
+	/// constructor.
+	/// </remarks>
+	/// <example>
+	/// public interface IHttpBasicAuthValidator : ISingletonDependency
+	/// {
+	/// 	bool IsValid();
+	/// }
+	/// public interface IHttpRequest : IVolatileDependency
+	/// {
+	/// 	string Username { get; }
+	/// 	string Password { get; }
+	/// }
+	/// public class HttpBasicAuthValidator : IHttpBasicAuthValidator
+	/// {
+	/// 	private Volatile&lt;IHttpRequest&gt; _request;
+	/// 	public HttpBasicAuthValidator(Volatile&lt;IHttpRequest&gt; _request)
+	/// 	{
+	/// 		_request = request;
+	/// 	}
+	/// 	public bool IsValue()
+	/// 	{
+	/// 		var rq = _request.Value;
+	/// 		return rq.Username == "Test" &amp;&amp; rq.Password == "test";
+	/// 	}
+	/// }
+	/// </example>
 	public class Volatile<T> : ISingletonDependency where T : IVolatileDependency
 	{
 		IVolatileContext _context;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Autocore.Volatile`1"/> class.
+		/// </summary>
+		/// <param name="context">Volatile context.</param>
 		public Volatile(IVolatileContext context)
 		{
 			_context = context;
 		}
 
+		/// <summary>
+		/// Gets the volatile value.
+		/// </summary>
+		/// <value>The value.</value>
+		/// <remarks>
+		/// DO NOT call Value in the constructor of a singleton service! 
+		/// </remarks>
 		public T Value 
 		{
 			get { return _context.Resolve<T>(); }

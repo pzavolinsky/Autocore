@@ -28,10 +28,18 @@ namespace Autocore
 {
 	public static class Factory
 	{
+		/// <summary>
+		/// Creates a root container loading dependencies from the current AppDomain.
+		/// </summary>
 		public static IContainer Create()
 		{
 			return Create(AppDomain.CurrentDomain.GetAssemblies());
 		}
+
+		/// <summary>
+		/// Creates a root container loading dependencies from the specified assemblies.
+		/// </summary>
+		/// <param name="assemblies">Assemblies to load dependencies from.</param>
 		public static IContainer Create(IEnumerable<Assembly> assemblies)
 		{
 			return Implementation.Factory.Create(assemblies);

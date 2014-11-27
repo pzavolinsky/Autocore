@@ -22,9 +22,43 @@
 // 
 namespace Autocore
 {
+	/// <summary>
+	/// Internal injectable dependency
+	/// </summary>
 	public interface IDependency {}
+	/// <summary>
+	/// Internal injectable non-volatile dependency
+	/// </summary>
 	public interface INonVolatileDependency : IDependency {}
+
+	/// <summary>
+	/// Injectable per-instance dependency.
+	/// </summary>
+	/// <remarks>
+	/// Services implementing this interface will be instantiated every time
+	/// the service is resolved though any of the Resolve<T> methods.
+	/// That is, the following assertion is always true:
+	///   Assert.AreNotEqual(cont.Resolve<IMySvc>(), cont.Resolve<IMySvc>());
+	/// </remarks>
 	public interface IInstanceDependency  : INonVolatileDependency {}
+
+	/// <summary>
+	/// Injectable singleton dependency.
+	/// </summary>
+	/// <remarks>
+	/// Services implementing this interface will be instantiated once per root
+	/// container and the same instance will be returned in every call to Resolve<T>.
+	/// </remarks>
 	public interface ISingletonDependency : INonVolatileDependency {}
+
+	/// <summary>
+	/// Injectable volatile dependency.
+	/// </summary>
+	/// <remarks>
+	/// Services implementing this interface will be instantiated once per volatile
+	/// scope container and the same instance will be returned in every call to Resolve<T>
+	/// inside that volatile scope.
+	/// </remarks>
+	/// <seealso cref="Autocore.Volatile`1"/>
 	public interface IVolatileDependency  : IDependency {}
 }

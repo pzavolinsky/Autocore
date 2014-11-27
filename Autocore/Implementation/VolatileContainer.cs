@@ -29,7 +29,7 @@ namespace Autocore.Implementation
 		public VolatileContainer(ILifetimeScope scope) : base(scope) {}
 		public new T Resolve<T>() where T : IDependency
 		{
-			return _scope.Resolve<T>();
+			return Scope.Resolve<T>();
 		}
 	}
 }

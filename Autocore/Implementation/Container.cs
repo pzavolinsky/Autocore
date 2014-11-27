@@ -29,26 +29,31 @@ namespace Autocore.Implementation
 	{
 		public const string VOLATILE_TAG = "__autocore_volatile__";
 
-		protected ILifetimeScope _scope;
 		public Container(ILifetimeScope scope)
 		{
-			_scope = scope;
+			Scope = scope;
 		}
+
 		public void Dispose()
 		{
-			_scope.Dispose();
+			Scope.Dispose();
 		}
+
+		public ILifetimeScope Scope { get; protected set; }
+
 		public T Resolve<T>() where T : INonVolatileDependency
 		{
-			return _scope.Resolve<T>();
+			return Scope.Resolve<T>();
 		}
+
 		public IContainer CreateScope()
 		{
-			return new Container(_scope.BeginLifetimeScope());
+			return new Container(Scope.BeginLifetimeScope());
 		}
+
 		public IVolatileContainer CreateVolatileScope()
 		{
-			return new VolatileContainer(_scope.BeginLifetimeScope(VOLATILE_TAG));
+			return new VolatileContainer(Scope.BeginLifetimeScope(VOLATILE_TAG));
 		}
 	}
 }

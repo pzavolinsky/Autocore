@@ -22,8 +22,15 @@
 // 
 namespace Autocore
 {
+	/// <summary>
+	/// A wrapper of the IImplicitContext that provides volatile dependency resolution.
+	/// </summary>
 	public interface IVolatileContext : ISingletonDependency
 	{
+		/// <summary>
+		/// Resolves an instance of the volatile service T.
+		/// </summary>
+		/// <typeparam name="T">The service type to be resolved.</typeparam>
 		T Resolve<T>() where T : IVolatileDependency;
 	}
 }

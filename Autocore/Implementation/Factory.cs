@@ -22,10 +22,8 @@
 // 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Autofac;
-using Autofac.Builder;
 
 namespace Autocore.Implementation
 {
@@ -34,51 +32,8 @@ namespace Autocore.Implementation
 		public static IContainer Create(IEnumerable<Assembly> assemblies)
 		{
 			var builder = new ContainerBuilder();
-
-			var components = assemblies.SelectMany(a => a.GetTypes())
-				.Where(t => !t.IsAbstract && t.IsClass && _dependency.IsAssignableFrom(t));
-
-			foreach (var comp in components)
-			{
-				if (comp.IsGenericType)
-				{
-					RegisterComponent(builder.RegisterGeneric(comp).AsSelf(), comp);
-				}
-				else
-				{
-					RegisterComponent(builder.RegisterType(comp).AsSelf(), comp);
-				}
-			}
-
+			builder.RegisterDependencyAssemblies(assemblies);
 			return new Container(builder.Build());
-		}
-
-		private static Type _dependency = typeof(IDependency);
-		private static Type _nonVolatileDependency = typeof(INonVolatileDependency);
-		private static Type _instanceDependency = typeof(IInstanceDependency);
-		private static Type _singletonDependency = typeof(ISingletonDependency);
-		private static Type _volatileDependency = typeof(IVolatileDependency);
-
-		private static void RegisterComponent<T, U, V>(IRegistrationBuilder<T,U,V> reg, Type comp)
-		{
-			foreach (var svc in comp.GetInterfaces().Where(i => _dependency.IsAssignableFrom(i)))
-			{
-				if (svc != _dependency && 
-					svc != _nonVolatileDependency &&
-					svc != _instanceDependency &&
-					svc != _singletonDependency && 
-					svc != _volatileDependency)
-				reg.As(svc);
-			}
-
-			if (_singletonDependency.IsAssignableFrom(comp))
-			{
-				reg.SingleInstance();
-			}
-			if (_volatileDependency.IsAssignableFrom(comp))
-			{
-				reg.InstancePerMatchingLifetimeScope(Container.VOLATILE_TAG);
-			}
 		}
 	}
 }

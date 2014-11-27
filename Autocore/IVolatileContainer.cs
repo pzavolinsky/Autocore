@@ -22,8 +22,15 @@
 // 
 namespace Autocore
 {
+	/// <summary>
+	/// A volatile IoC container that can resolve both volatile and non-volatile dependencies.
+	/// </summary>
 	public interface IVolatileContainer : IContainer
 	{
+		/// <summary>
+		/// Resolves an instance of the service T.
+		/// </summary>
+		/// <typeparam name="T">The service type to be resolved.</typeparam>
 		new T Resolve<T>() where T : IDependency;
 	}
 }
