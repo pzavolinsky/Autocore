@@ -22,6 +22,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Autocore
@@ -31,9 +32,14 @@ namespace Autocore
 		/// <summary>
 		/// Creates a root container loading dependencies from the current AppDomain.
 		/// </summary>
-		public static IContainer Create()
+		public static IContainer Create(Func<Assembly,bool> filter = null)
 		{
-			return Create(AppDomain.CurrentDomain.GetAssemblies());
+			var asm = AppDomain.CurrentDomain.GetAssemblies();
+			if (filter != null)
+			{
+				asm = asm.Where(filter).ToArray();
+			}
+			return Create(asm);
 		}
 
 		/// <summary>

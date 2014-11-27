@@ -26,7 +26,7 @@ namespace Autocore
 	/// An IoC container abstraction with nested volatile and non-volatile
 	/// scopes.
 	/// </summary>
-	public interface IContainer : System.IDisposable
+	public interface IContainer : ISingletonDependency, System.IDisposable
 	{
 		/// <summary>
 		/// Resolves an instance of the non-volatile service T.

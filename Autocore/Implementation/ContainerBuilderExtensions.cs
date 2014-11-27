@@ -33,6 +33,11 @@ namespace Autocore.Implementation
 	{
 		public static void RegisterDependencyAssemblies(this ContainerBuilder builder, IEnumerable<Assembly> assemblies)
 		{
+			var asm = typeof(ContainerBuilderExtensions).Assembly;
+			if (!assemblies.Contains(asm))
+			{
+				assemblies = assemblies.Concat(new Assembly[] { asm });
+			}
 			RegisterDependencyTypes(builder, assemblies
                 .SelectMany(a => a.GetTypes())
 				.Where(t => !t.IsAbstract && t.IsClass && _dependency.IsAssignableFrom(t))
