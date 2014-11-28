@@ -58,7 +58,7 @@ Basic concepts
 
 Autocore hides most of the complexity required to setup an IoC container for dependency injection. This section introduces the most important concepts of Autocore and how to take advantage of its declarative design.
 
-**Disclaimer**: thorughout this text I refer to *service* in the sense of a contract that a component implements. In other words, you should read *service* as a synonym of *interface* and avoid the confusion with the other type of services (e.g. REST, SOAP, WCF, etc.).
+**Disclaimer**: throughout this text I refer to *service* in the sense of a contract that a component implements. In other words, you should read *service* as a synonym of *interface* and avoid the confusion with the other type of services (e.g. REST, SOAP, WCF, etc.).
 
 #### Interfaces
 The magic behind Autocore's automatic component registration are three marker interfaces, namely:
@@ -232,3 +232,56 @@ using (var container = Autocore.Factory.Create())
 	});
 }
 ```
+
+#### The ```Factory``` façade
+Autocore relies heavily on the façade pattern to provide simple abstractions to complex operations without completly hiding the low-level API. 
+
+In other words, while the ```Factory``` class might provide useful helpers to quickly construct a container, in some cases you might need more flexibility and/or power. Autocore is designed to help you navigate throught these scenarios without getting in the way.
+
+This section shows some examples of façade unwinding to gradually provide more flexibility.
+
+##### The happy path
+```C#
+var container = Autocore.Factory.Create();
+```
+Registers dependencies in every assembly loaded in the current AppDomain.
+
+##### Create with an assembly filter
+```C#
+var container = Autocore.Factory.Create(asm => asm.FullName.StartsWith("MyApp"));
+```
+Registers dependencies in every assembly loaded in the current AppDomain for which the filter lambda returns true (i.e. whose full name starts with *MyApp*).
+ 
+##### Create with a list of assemblies
+```C#
+var assemblies = new Assembly[] { typeof(MyApp).Assembly, typeof(MyPlugin).Assembly };
+var container = Autocore.Factory.Create(assemblies);
+```
+Registers dependencies in specified assemblies.
+ 
+##### Create from an ```Autofac.ContainerBuilder```
+```C#
+var assemblies = new Assembly[] { ... }; // AppDomain.CurrentDomain.GetAssemblies();
+
+var builder = new ContainerBuilder();
+
+// do advanced Autofac builder configuration
+
+builder.RegisterDependencyAssemblies(assemblies); // Autocore extension
+var container = new Autocore.Implementation.Container(builder.Build());
+```
+Constructs an ```Autocore.IContainer``` from a custom ```Autofac.ContainerBuilder``` and registers dependencies in the specified assemblies.
+
+##### Create specific list of types
+```C#
+var types = new Type[] { ... };
+
+var builder = new ContainerBuilder();
+
+// do advanced Autofac builder configuration
+
+builder.RegisterDependencyTypes(types); // Autocore extension
+var container = new Autocore.Implementation.Container(builder.Build());
+```
+Constructs an ```Autocore.IContainer``` from a custom ```Autofac.ContainerBuilder``` and registers the specified dependency types.
+
