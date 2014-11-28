@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // 
+using System;
+
 namespace Autocore.Implementation
 {
 	public class VolatileContext : IVolatileContext
@@ -32,6 +34,10 @@ namespace Autocore.Implementation
 
 		public T Resolve<T>() where T : IVolatileDependency
 		{
+			if (_context.Container == null)
+			{
+				throw new InvalidOperationException("Attempted to access a volatile dependency outside a volatile scope. Consider wrapping this code in a call to IContainer.ExecuteInVolatileScope");
+			}
 			return _context.Container.Resolve<T>();
 		}
 	}
