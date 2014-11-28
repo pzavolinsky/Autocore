@@ -234,9 +234,9 @@ using (var container = Autocore.Factory.Create())
 ```
 
 #### The ```Factory``` façade
-Autocore relies heavily on the façade pattern to provide simple abstractions to complex operations without completly hiding the low-level API. 
+Autocore relies heavily on the façade pattern to provide simple abstractions to complex operations without completely hiding the low-level API. 
 
-In other words, while the ```Factory``` class might provide useful helpers to quickly construct a container, in some cases you might need more flexibility and/or power. Autocore is designed to help you navigate throught these scenarios without getting in the way.
+In other words, while the ```Factory``` class might provide useful helpers to quickly construct a container, in some cases you might need more flexibility and/or power. Autocore is designed to help you navigate through these scenarios without getting in the way.
 
 This section shows some examples of façade unwinding to gradually provide more flexibility.
 
@@ -272,7 +272,7 @@ var container = new Autocore.Implementation.Container(builder.Build());
 ```
 Constructs an ```Autocore.IContainer``` from a custom ```Autofac.ContainerBuilder``` and registers dependencies in the specified assemblies.
 
-##### Create specific list of types
+##### Create from a specific list of types
 ```C#
 var types = new Type[] { ... };
 
