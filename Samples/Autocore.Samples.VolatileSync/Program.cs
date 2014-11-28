@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Autocore.Samples.VolatileSync
 {
-	#region Operation start time service
+	#region User service
 	public interface IUser : IVolatileDependency
 	{
 		string Name { get; set; }
