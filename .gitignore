@@ -1,5 +1,5 @@
 packages
-*/bin/*
-*/obj/*
+**/bin/*
+**/obj/*
 test-results
 *.userprefs
