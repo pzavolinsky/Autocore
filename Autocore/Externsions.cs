@@ -21,13 +21,14 @@
 // SOFTWARE.
 // 
 using System;
+using System.Threading.Tasks;
 
 namespace Autocore
 {
 	public static class Extensions
 	{
 		/// <summary>
-		/// Executes the callback in a volatile scope tha is disposed after the execution.
+		/// Executes the callback in a volatile scope that is disposed after the execution.
 		/// </summary>
 		/// <returns>The value returned by callback.</returns>
 		/// <param name="container">Container instance.</param>
@@ -42,7 +43,22 @@ namespace Autocore
 		}
 
 		/// <summary>
-		/// Executes the callback in a volatile scope tha is disposed after the execution.
+		/// Executes the async callback in a volatile scope that is disposed after the execution.
+		/// </summary>
+		/// <returns>The value returned by callback.</returns>
+		/// <param name="container">Container instance.</param>
+		/// <param name="callback">Async callback function to be executed in a volatile scope.</param>
+		/// <typeparam name="T">The return value type of callback.</typeparam>
+		public static async Task<T> ExecuteInVolatileScopeAsync<T>(this IContainer container, Func<IVolatileContainer, Task<T>> callback)
+		{
+			using (var scope = new Implementation.ImplicitVolatileScope(container))
+			{
+				return await callback(scope.Container);
+			}
+		}
+
+		/// <summary>
+		/// Executes the callback in a volatile scope that is disposed after the execution.
 		/// </summary>
 		/// <param name="container">Container instance.</param>
 		/// <param name="callback">Callback function to be executed in a volatile scope.</param>
@@ -51,6 +67,19 @@ namespace Autocore
 			using (var scope = new Implementation.ImplicitVolatileScope(container))
 			{
 				callback(scope.Container);
+			}
+		}
+
+		/// <summary>
+		/// Executes the async callback in a volatile scope that is disposed after the execution.
+		/// </summary>
+		/// <param name="container">Container instance.</param>
+		/// <param name="callback">Async callback function to be executed in a volatile scope.</param>
+		public static async Task ExecuteInVolatileScopeAsync(this IContainer container, Func<IVolatileContainer, Task> callback)
+		{
+			using (var scope = new Implementation.ImplicitVolatileScope(container))
+			{
+				await callback(scope.Container);
 			}
 		}
 	}
