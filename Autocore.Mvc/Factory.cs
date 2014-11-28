@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Web.Mvc;
-using Autofac.Integration.Mvc;
-using Autofac;
 using Autocore.Implementation;
+using Autofac;
+using Autofac.Integration.Mvc;
+using System.Linq;
 
 namespace Autocore.Mvc
 {
 	public static class Factory
 	{
+		public static IContainer Create(params Assembly[] assemblies)
+		{
+			return Create((IEnumerable<Assembly>)assemblies);
+		}
 		public static IContainer Create(IEnumerable<Assembly> assemblies)
 		{
 			var asm = typeof(Factory).Assembly;

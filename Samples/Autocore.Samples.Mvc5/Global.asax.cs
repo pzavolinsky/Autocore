@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using System.Reflection;
 
 namespace Autocore.Samples.Mvc5
 {
@@ -29,7 +26,7 @@ namespace Autocore.Samples.Mvc5
 
 		protected void Application_Start()
 		{
-			Autocore.Mvc.Factory.Create(new Assembly[] { typeof(MvcApplication).Assembly });
+			Autocore.Mvc.Factory.Create(typeof(MvcApplication).Assembly);
 			AreaRegistration.RegisterAllAreas();
 			RegisterGlobalFilters(GlobalFilters.Filters);
 			RegisterRoutes(RouteTable.Routes);
