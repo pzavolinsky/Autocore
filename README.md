@@ -96,7 +96,7 @@ Even if you don't care about the scope of your services, you are making an impli
 
 Ideally this decision should be pretty straight forward: the service should be singleton unless it uses per-call information. 
 
-But things tend to get a lot messier when you start using implicit contextual state that looks like static but is in fact per-call. Typical examples include ```HttpContext.Current```, anything that users ```[ThreadStatic]```, ```CallContext.LogicalGetData```, etc.
+But things tend to get a lot messier when you start using implicit contextual state that looks like static but is in fact per-call. Typical examples include ```HttpContext.Current```, anything that uses ```[ThreadStatic]```, ```CallContext.LogicalGetData```, etc.
 
 But what about this (broken) snippet:
 ```C#
