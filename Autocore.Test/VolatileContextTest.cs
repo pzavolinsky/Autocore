@@ -2,6 +2,7 @@
 using Autocore;
 using Moq;
 using NUnit.Framework;
+using Autocore.Interfaces;
 using Autocore.Implementation;
 
 namespace Autocore.Test

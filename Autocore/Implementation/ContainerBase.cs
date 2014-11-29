@@ -22,6 +22,7 @@
 // 
 using System;
 using Autofac;
+using Autocore.Interfaces;
 
 namespace Autocore.Implementation
 {

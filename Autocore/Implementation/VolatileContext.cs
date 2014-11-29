@@ -21,6 +21,7 @@
 // SOFTWARE.
 // 
 using System;
+using Autocore.Interfaces;
 
 namespace Autocore.Implementation
 {

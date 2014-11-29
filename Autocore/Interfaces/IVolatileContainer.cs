@@ -20,17 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // 
-namespace Autocore
+namespace Autocore.Interfaces
 {
 	/// <summary>
-	/// A wrapper of the IImplicitContext that provides volatile dependency resolution.
+	/// A volatile IoC container that can resolve both volatile and non-volatile dependencies.
 	/// </summary>
-	public interface IVolatileContext : ISingletonDependency
+	public interface IVolatileContainer : IContainerBase
 	{
 		/// <summary>
-		/// Resolves an instance of the volatile service T.
+		/// Resolves an instance of the service T.
 		/// </summary>
 		/// <typeparam name="T">The service type to be resolved.</typeparam>
-		T Resolve<T>() where T : IVolatileDependency;
+		T Resolve<T>() where T : IDependency;
 	}
 }

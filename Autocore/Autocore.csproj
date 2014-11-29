@@ -37,7 +37,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IContainerBase.cs" />
     <Compile Include="Implementation\ContainerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Factory.cs" />
@@ -46,19 +45,23 @@
     <Compile Include="Implementation\Container.cs" />
     <Compile Include="IContainer.cs" />
     <Compile Include="Implementation\ImplicitContext.cs" />
-    <Compile Include="IImplicitContext.cs" />
     <Compile Include="Implementation\VolatileContainer.cs" />
     <Compile Include="Implementation\VolatileContext.cs" />
-    <Compile Include="IVolatileContainer.cs" />
-    <Compile Include="IVolatileContext.cs" />
     <Compile Include="IDependency.cs" />
     <Compile Include="Implementation\Factory.cs" />
     <Compile Include="Implementation\ImplicitVolatileScope.cs" />
     <Compile Include="Implementation\ContainerBuilderExtensions.cs" />
+    <Compile Include="Interfaces\IContainerBase.cs" />
+    <Compile Include="Interfaces\IImplicitContext.cs" />
+    <Compile Include="Interfaces\IVolatileContainer.cs" />
+    <Compile Include="Interfaces\IVolatileContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
 </Project>

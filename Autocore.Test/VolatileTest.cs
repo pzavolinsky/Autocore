@@ -1,5 +1,6 @@
 using System;
 using Autofac;
+using Autocore.Interfaces;
 using Autocore.Implementation;
 using Moq;
 using NUnit.Framework;
