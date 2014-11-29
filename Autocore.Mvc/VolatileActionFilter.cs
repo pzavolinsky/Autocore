@@ -1,13 +1,14 @@
-using System;
-using System.Web.Mvc;
 using Autocore.Implementation;
 using System.Collections.Generic;
+using System.Web;
+using System.Web.Mvc;
 
 namespace Autocore.Mvc
 {
 	public class VolatileActionFilter : IActionFilter, ISingletonDependency
 	{
-		Stack<ImplicitVolatileScope> _stack = new Stack<ImplicitVolatileScope>();
+		public const string PROPERTY_KEY = "__autocore_scope__";
+
 		IContainer _container;
 
 		public VolatileActionFilter(IContainer container)
@@ -17,12 +18,37 @@ namespace Autocore.Mvc
 
 		public void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-			_stack.Push(new ImplicitVolatileScope(_container));
+			Push(filterContext.HttpContext);
 		}
 
 		public void OnActionExecuted(ActionExecutedContext filterContext)
 		{
-			_stack.Pop().Dispose();
+			Pop(filterContext.HttpContext);
+		}
+
+		protected void Push(HttpContextBase context)
+		{
+			Stack<ImplicitVolatileScope> stack;
+			if (!context.Items.Contains(PROPERTY_KEY))
+			{
+				stack = new Stack<ImplicitVolatileScope>();
+				context.Items[PROPERTY_KEY] = stack;
+			}
+			else
+			{
+				stack = context.Items[PROPERTY_KEY] as Stack<ImplicitVolatileScope>;
+			}
+			stack.Push(new ImplicitVolatileScope(_container));
+		}
+
+		protected void Pop(HttpContextBase context)
+		{
+			if (!context.Items.Contains(PROPERTY_KEY))
+			{
+				return;
+			}
+			var stack = context.Items[PROPERTY_KEY] as Stack<ImplicitVolatileScope>;
+			stack.Pop().Dispose();
 		}
 	}
 }
