@@ -13,7 +13,16 @@ Some of Autocore's features include:
 Installation
 ------------
 
-TODO
+Grab the **Autocore** package from NuGet by typing this in the Visual Studio package manager powershell console:
+
+`PM> install-package Autocore`
+
+or by running:
+
+```Shell
+cd your-project-directory # the one with the .csproj
+mono NuGet.exe install Autocore
+```
 
 Hello World
 -----------

@@ -1,7 +1,8 @@
-.PHONY: all test coverage show package
+.PHONY: all test coverage show package push-package
 all: coverage
 test: test-results/coverage.cov
 coverage: test-results/coverage/project.html
+package: pkg/Autocore.1.0.0.0.nupkg
 
 MONO:=../mono-custom
 NUGET:=../NuGet.exe
@@ -30,6 +31,9 @@ test-results/coverage/project.html: test-results/coverage.cov
 show:
 	xdg-open test-results/coverage/project.html
 
-package: $(RELEASE)
+pkg/Autocore.1.0.0.0.nupkg: $(RELEASE)
 	mkdir -p pkg
 	cd pkg; ../$(MONO)/bin/mono ../$(NUGET) pack ../Autocore/Autocore.nuspec -Verbosity detailed
+
+push-package: pkg/Autocore.1.0.0.0.nupkg
+	XDG_CONFIG_HOME=~/.mono $(MONO)/bin/mono $(NUGET) push $< -Verbosity detailed
