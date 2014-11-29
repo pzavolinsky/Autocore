@@ -1,13 +1,19 @@
-.PHONY: all test coverage show
+.PHONY: all test coverage show package
 all: coverage
 test: test-results/coverage.cov
 coverage: test-results/coverage/project.html
 
 MONO:=../mono-custom
+NUGET:=../NuGet.exe
+
 ASSEMBLIES:=Autocore/bin/Debug/Autocore.dll Autocore.Test/bin/Debug/Autocore.Test.dll
+RELEASE:=Autocore/bin/Release/Autocore.dll
 
 $(ASSEMBLIES):
-	xbuild
+	mdtool build
+
+$(RELEASE):
+	cd Autocore; mdtool build -c:Release
 
 test-results/coverage.cov: $(ASSEMBLIES)
 	@echo "=== Running tests ============="
@@ -24,3 +30,6 @@ test-results/coverage/project.html: test-results/coverage.cov
 show:
 	xdg-open test-results/coverage/project.html
 
+package: $(RELEASE)
+	mkdir -p pkg
+	cd pkg; ../$(MONO)/bin/mono ../$(NUGET) pack ../Autocore/Autocore.nuspec -Verbosity detailed

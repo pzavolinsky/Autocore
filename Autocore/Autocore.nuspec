@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>Autocore</id>
+    <version>1.0.0.0</version>
+    <title>Autocore</title>
+    <authors>Patricio Zavolinsky</authors>
+    <owners>Patricio Zavolinsky</owners>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://github.com/pzavolinsky/Autocore</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Autocore is a pre-configured application core designed for building declarative modular applications.</description>
+    <dependencies>
+       <dependency id="Autofac" version="3.5.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin/Release/Autocore.dll" target="lib/net45/Autocore.dll" />
+    <file src="bin/Release/Autocore.xml" target="lib/net45/Autocore.xml" />
+  </files>
+</package>

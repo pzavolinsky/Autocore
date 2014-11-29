@@ -5,9 +5,9 @@ using System.Runtime.CompilerServices;
 // Change them to the values specific to your project.
 
 [assembly: AssemblyTitle ("Autocore")]
-[assembly: AssemblyDescription ("")]
+[assembly: AssemblyDescription ("Pre-configured application core designed for building declarative modular applications")]
 [assembly: AssemblyConfiguration ("")]
-[assembly: AssemblyCompany ("")]
+[assembly: AssemblyCompany ("Patricio Zavolinsky")]
 [assembly: AssemblyProduct ("")]
 [assembly: AssemblyCopyright ("pzavolinsky")]
 [assembly: AssemblyTrademark ("")]
