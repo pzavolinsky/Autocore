@@ -27,7 +27,7 @@ namespace Autocore.Implementation
 	/// <summary>
 	/// Volatile container implementation.
 	/// </summary>
-	public class VolatileContainer : Container, IVolatileContainer
+	public class VolatileContainer : ContainerBase, IVolatileContainer
 	{
 		/// <summary>
 		/// Initializes a new volatile container instance.
@@ -36,7 +36,7 @@ namespace Autocore.Implementation
 		public VolatileContainer(ILifetimeScope scope) : base(scope) {}
 
 		/// <see cref="Autocore.IVolatileContainer.Resolve&lt;T&gt;"/>
-		public new T Resolve<T>() where T : IDependency
+		public T Resolve<T>() where T : IDependency
 		{
 			return Scope.Resolve<T>();
 		}

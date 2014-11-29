@@ -20,17 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // 
-namespace Autocore
+using System;
+using Autofac;
+
+namespace Autocore.Implementation
 {
 	/// <summary>
-	/// A volatile IoC container that can resolve both volatile and non-volatile dependencies.
+	/// Container implementation.
 	/// </summary>
-	public interface IVolatileContainer : IContainerBase
+	public class ContainerBase : IContainerBase
 	{
 		/// <summary>
-		/// Resolves an instance of the service T.
+		/// Tag attached to the volatile lifetime scopes (i.e. nested containers).
 		/// </summary>
-		/// <typeparam name="T">The service type to be resolved.</typeparam>
-		T Resolve<T>() where T : IDependency;
+		public const string VOLATILE_TAG = "__autocore_volatile__";
+
+		/// <summary>
+		/// Initializes a new container instance.
+		/// </summary>
+		/// <param name="scope">Autofac lifetime scope.</param>
+		public ContainerBase(ILifetimeScope scope)
+		{
+			Scope = scope;
+		}
+
+		/// <summary>
+		/// Releases all resource used by the container object.
+		/// </summary>
+		public void Dispose()
+		{
+			Scope.Dispose();
+		}
+
+		/// <summary>
+		/// Gets the Autofac lifetime scope.
+		/// </summary>
+		/// <value>The scope.</value>
+		public ILifetimeScope Scope { get; protected set; }
+
+		/// <see cref="Autocore.IContainer.CreateScope"/>
+		public IContainer CreateScope()
+		{
+			return new Container(Scope.BeginLifetimeScope());
+		}
+
+		/// <see cref="Autocore.IContainer.CreateVolatileScope"/>
+		public IVolatileContainer CreateVolatileScope()
+		{
+			return new VolatileContainer(Scope.BeginLifetimeScope(VOLATILE_TAG));
+		}
 	}
 }
