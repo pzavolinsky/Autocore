@@ -29,8 +29,16 @@ using System.Linq;
 
 namespace Autocore.Implementation
 {
+	/// <summary>
+	/// Container builder extensions.
+	/// </summary>
 	public static class ContainerBuilderExtensions
 	{
+		/// <summary>
+		/// Registers dependencies from the specified assemblies.
+		/// </summary>
+		/// <param name="builder">Container builder.</param>
+		/// <param name="assemblies">Assemblies.</param>
 		public static void RegisterDependencyAssemblies(this ContainerBuilder builder, IEnumerable<Assembly> assemblies)
 		{
 			var asm = typeof(ContainerBuilderExtensions).Assembly;
@@ -44,6 +52,11 @@ namespace Autocore.Implementation
             );
 		}
 
+		/// <summary>
+		/// Registers dependencies from the specified types.
+		/// </summary>
+		/// <param name="builder">Container builder.</param>
+		/// <param name="types">Types.</param>
 		public static void RegisterDependencyTypes(this ContainerBuilder builder, IEnumerable<Type> types)
 		{
 			foreach (var comp in types)
@@ -59,6 +72,14 @@ namespace Autocore.Implementation
 			}
 		}
 
+		/// <summary>
+		/// Registers the component according to its dependency interfaces.
+		/// </summary>
+		/// <param name="reg">Registration builder.</param>
+		/// <param name="comp">Component type.</param>
+		/// <typeparam name="T">Inferred from the return value of builder.Register*().</typeparam>
+		/// <typeparam name="U">Inferred from the return value of builder.Register*().</typeparam>
+		/// <typeparam name="V">Inferred from the return value of builder.Register*().</typeparam>
 		public static void RegisterComponent<T, U, V>(IRegistrationBuilder<T,U,V> reg, Type comp)
 		{
 			foreach (var svc in comp.GetInterfaces().Where(i => _dependency.IsAssignableFrom(i)))

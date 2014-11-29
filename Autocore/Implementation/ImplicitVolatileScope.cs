@@ -24,21 +24,40 @@ using System;
 
 namespace Autocore.Implementation
 {
+	/// <summary>
+	/// Implicit volatile scope implementation.
+	/// </summary>
 	public class ImplicitVolatileScope : IDisposable
 	{
 		IImplicitContext _context;
 		IVolatileContainer _lastScope;
+
+		/// <summary>
+		/// Initializes a new implicit volatile scope instance.
+		/// </summary>
+		/// <remarks>Creates a new volatile scope and pushes the scope into the implicit context.</remarks>
+		/// <param name="container">Container.</param>
 		public ImplicitVolatileScope(IContainer container)
 		{
 			_context = container.Resolve<IImplicitContext>();
 			_lastScope = _context.Container;
 			_context.Container = Container = container.CreateVolatileScope();
 		}
+
+		/// <summary>
+		/// Releases all resource used by the implicit volatile scope.
+		/// </summary>
+		/// <remarks>Pops the current volatile scope from the implicit context and disposes the scope.</remarks>
 		public void Dispose()
 		{
 			_context.Container.Dispose();
 			_context.Container = _lastScope;
 		}
+
+		/// <summary>
+		/// Gets the current volatile scope container.
+		/// </summary>
+		/// <value>The container.</value>
 		public IVolatileContainer Container { get; protected set; }
 	}
 }

@@ -27,6 +27,9 @@ using System.Reflection;
 
 namespace Autocore
 {
+	/// <summary>
+	/// Factory façade.
+	/// </summary>
 	public static class Factory
 	{
 		/// <summary>

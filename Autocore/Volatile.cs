@@ -34,7 +34,7 @@ namespace Autocore
 	/// of singleton instances to see different volatile values.
 	/// 
 	/// A singleton service that requires access to a volatile service needs to take
-	/// a dependency on Volatile<IMyService> instead of directly on IMyService because
+	/// a dependency on Volatile&lt;IMyService&gt; instead of directly on IMyService because
 	/// the singleton will be called many times with different IMyService instances.
 	/// </description>
 	/// <remarks>
@@ -73,7 +73,7 @@ namespace Autocore
 		IVolatileContext _context;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Autocore.Volatile`1"/> class.
+		/// Initializes a new volatile instance.
 		/// </summary>
 		/// <param name="context">Volatile context.</param>
 		public Volatile(IVolatileContext context)

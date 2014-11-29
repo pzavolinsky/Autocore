@@ -24,9 +24,18 @@ using Autofac;
 
 namespace Autocore.Implementation
 {
+	/// <summary>
+	/// Volatile container implementation.
+	/// </summary>
 	public class VolatileContainer : Container, IVolatileContainer
 	{
+		/// <summary>
+		/// Initializes a new volatile container instance.
+		/// </summary>
+		/// <param name="scope">Autofac lifetime scope.</param>
 		public VolatileContainer(ILifetimeScope scope) : base(scope) {}
+
+		/// <see cref="Autocore.IVolatileContainer.Resolve&lt;T&gt;"/>
 		public new T Resolve<T>() where T : IDependency
 		{
 			return Scope.Resolve<T>();

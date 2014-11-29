@@ -24,9 +24,17 @@ using System.Runtime.Remoting.Messaging;
 
 namespace Autocore.Implementation
 {
+	/// <summary>
+	/// Implicit context implementation.
+	/// </summary>
 	public class ImplicitContext : IImplicitContext
 	{
+		/// <summary>
+		/// Logical call context key for the current volatile container.
+		/// </summary>
 		public const string SCOPE_KEY = "__autocore_container__";
+
+		/// <see cref="Autocore.IImplicitContext.Container"/>
 		public IVolatileContainer Container {
 			get { return CallContext.LogicalGetData(SCOPE_KEY) as IVolatileContainer; }
 			set { CallContext.LogicalSetData(SCOPE_KEY, value); }

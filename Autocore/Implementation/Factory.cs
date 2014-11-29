@@ -27,8 +27,15 @@ using Autofac;
 
 namespace Autocore.Implementation
 {
+	/// <summary>
+	/// Factory façade implementation.
+	/// </summary>
 	public static class Factory
 	{
+		/// <summary>
+		/// Creates a container instance registering dependencies from the specified assemblies.
+		/// </summary>
+		/// <param name="assemblies">Assemblies.</param>
 		public static IContainer Create(IEnumerable<Assembly> assemblies)
 		{
 			var builder = new ContainerBuilder();

@@ -25,6 +25,9 @@ using System.Threading.Tasks;
 
 namespace Autocore
 {
+	/// <summary>
+	/// Container extensions.
+	/// </summary>
 	public static class Extensions
 	{
 		/// <summary>

@@ -24,14 +24,23 @@ using System;
 
 namespace Autocore.Implementation
 {
+	/// <summary>
+	/// Volatile context implementation.
+	/// </summary>
 	public class VolatileContext : IVolatileContext
 	{
 		IImplicitContext _context;
+
+		/// <summary>
+		/// Initializes a new volatile context instance.
+		/// </summary>
+		/// <param name="context">Implicit context.</param>
 		public VolatileContext(IImplicitContext context)
 		{
 			_context = context;
 		}
 
+		/// <see cref="Autocore.IVolatileContext.Resolve&lt;T&gt;"/>
 		public T Resolve<T>() where T : IVolatileDependency
 		{
 			if (_context.Container == null)
