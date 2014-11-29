@@ -1,4 +1,4 @@
-.PHONY: all test coverage show package push-package
+.PHONY: all test coverage show package push-package clean
 all: coverage
 test: test-results/coverage.cov
 coverage: test-results/coverage/project.html
@@ -9,6 +9,7 @@ NUGET:=../NuGet.exe
 
 ASSEMBLIES:=Autocore/bin/Debug/Autocore.dll Autocore.Test/bin/Debug/Autocore.Test.dll
 RELEASE:=Autocore/bin/Release/Autocore.dll
+BINARIES:=$(shell find \( -name 'bin' -o -name 'obj' \) -a -type d)
 
 $(ASSEMBLIES):
 	mdtool build
@@ -37,3 +38,11 @@ pkg/Autocore.1.0.0.0.nupkg: $(RELEASE)
 
 push-package: pkg/Autocore.1.0.0.0.nupkg
 	XDG_CONFIG_HOME=~/.mono $(MONO)/bin/mono $(NUGET) push $< -Verbosity detailed
+
+clean:
+	@if [ ! -z "$(BINARIES)" ]; then \
+		echo Will remove: ;\
+		echo -n '  - ' ;\
+		echo $(BINARIES) | sed -e 's/ /\n  - /g' ; \
+		rm -rI $(BINARIES); \
+	fi
