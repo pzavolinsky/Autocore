@@ -5,3 +5,4 @@ test-results
 *.userprefs
 pkg
 *.suo
+Autocore.snk

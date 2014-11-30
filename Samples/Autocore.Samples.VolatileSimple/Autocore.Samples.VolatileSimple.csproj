@@ -10,6 +10,7 @@
     <RootNamespace>Autocore.Samples.VolatileSimple</RootNamespace>
     <AssemblyName>Autocore.Samples.VolatileSimple</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <ReleaseVersion>1.2.1</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
