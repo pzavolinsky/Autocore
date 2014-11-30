@@ -62,6 +62,68 @@ namespace HelloWorld
 }
 ```
 
+Integrations
+------------
+
+Autocore provides pre-configured integrations for ASP.NET MVC and ASP.NET WebAPI. These integrations are provided as separate packages.
+
+#### MVC Integration
+Install with
+
+`PM> install-package Autocore.Mvc`
+
+or
+
+```Shell
+cd your-project-directory # the one with the .csproj
+mono NuGet.exe install Autocore.Mvc
+```
+
+Open ```Global.asax.cs``` and add the following line to the ```Application_Start()``` method:
+
+```C#
+public class MvcApplication : System.Web.HttpApplication
+{
+  protected void Application_Start()
+  {
+    Autocore.Mvc.Factory.Create(typeof(MvcApplication).Assembly);
+
+    // the rest of your Application_Start() method follows ...
+  }
+}
+```
+
+After this setup you can start injecting dependencies to your regular MVC controllers. Check [Samples/Autocore.Samples.Mvc5](https://github.com/pzavolinsky/Autocore/tree/master/Samples/Autocore.Samples.Mvc5) for a complete example.
+
+#### WebAPI Integration
+Install with
+
+`PM> install-package Autocore.WebApi`
+
+or
+
+```Shell
+cd your-project-directory # the one with the .csproj
+mono NuGet.exe install Autocore.WebApi
+```
+
+Open ```App_Start/WebApiConfig.cs``` and add the following line to the ```Register()``` method:
+
+```C#
+public static class WebApiConfig
+{
+  public static void Register(HttpConfiguration config)
+  {
+    config.RegisterAutocore(typeof(WebApiConfig).Assembly);
+
+    // the rest of your Register() method follows ...
+  }
+}
+```
+
+After this setup you can start injecting dependencies to your regular Api controllers. Check [Samples/Autocore.Samples.WebApi](https://github.com/pzavolinsky/Autocore/tree/master/Samples/Autocore.Samples.WebApi) for a complete example.
+
+
 Basic concepts
 --------------
 
