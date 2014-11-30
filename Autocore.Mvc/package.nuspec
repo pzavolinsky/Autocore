@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Autocore.Mvc</id>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <title>Autocore Mvc</title>
     <authors>Patricio Zavolinsky</authors>
     <owners>Patricio Zavolinsky</owners>
@@ -13,7 +13,7 @@
     <dependencies>
        <dependency id="Autofac" version="3.5.2" />
        <dependency id="Autofac.Mvc5" version="3.3.3" />
-       <dependency id="Autocore" version="1.2.1" />
+       <dependency id="Autocore" version="1.2.2" />
     </dependencies>
   </metadata>
   <files>
