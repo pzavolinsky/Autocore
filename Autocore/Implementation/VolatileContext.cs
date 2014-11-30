@@ -41,7 +41,7 @@ namespace Autocore.Implementation
 			_context = context;
 		}
 
-		/// <see cref="Autocore.IVolatileContext.Resolve&lt;T&gt;"/>
+		/// <see cref="Autocore.Interfaces.IVolatileContext.Resolve&lt;T&gt;"/>
 		public T Resolve<T>() where T : IVolatileDependency
 		{
 			if (_context.Container == null)

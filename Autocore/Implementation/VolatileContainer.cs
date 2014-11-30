@@ -36,7 +36,7 @@ namespace Autocore.Implementation
 		/// <param name="scope">Autofac lifetime scope.</param>
 		public VolatileContainer(ILifetimeScope scope) : base(scope) {}
 
-		/// <see cref="Autocore.IVolatileContainer.Resolve&lt;T&gt;"/>
+		/// <see cref="Autocore.Interfaces.IVolatileContainer.Resolve&lt;T&gt;"/>
 		public T Resolve<T>() where T : IDependency
 		{
 			return Scope.Resolve<T>();
