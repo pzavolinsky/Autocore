@@ -101,7 +101,7 @@ $(PKG_BIN) : pkg/%.$(PKG_VER).nupkg : %/package.nuspec $(RELEASE_FILES)
 
 push-package: $(PKG_BIN)
 	@for file in $^; do                                        \
-		echo XDG_CONFIG_HOME=~/.mono $(MONO)/bin/mono $(NUGET) push $$file -Verbosity detailed; \
+		XDG_CONFIG_HOME=~/.mono $(MONO)/bin/mono $(NUGET) push $$file -Verbosity detailed; \
 	done
 
 # === Clean ========================================================== #
