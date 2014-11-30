@@ -107,9 +107,11 @@ cd your-project-directory # the one with the .csproj
 mono NuGet.exe install Autocore.WebApi
 ```
 
-Open ```App_Start/WebApiConfig.cs``` and add the following line to the ```Register()``` method:
+Open ```App_Start/WebApiConfig.cs``` and add the *using* and *RegisterAutocore* lines below:
 
 ```C#
+using Autocore.WebApi; // <-- don't forget this!
+
 public static class WebApiConfig
 {
   public static void Register(HttpConfiguration config)
