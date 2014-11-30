@@ -1,4 +1,4 @@
-.PHONY: all test coverage show package push-package clean samples update-version bump
+.PHONY: all coverage
 all: coverage
 
 # === Config ========================================================= #
@@ -6,21 +6,15 @@ all: coverage
 MONO:=../mono-custom
 NUGET:=../NuGet.exe
 
-ASSEMBLIES:=Autocore/bin/Debug/Autocore.dll Autocore.Test/bin/Debug/Autocore.Test.dll
-RELEASE:=Autocore/bin/Release/Autocore.dll
+# === Test =========================================================== #
+.PHONY: test show
+test: test-results/coverage.cov
+coverage: test-results/coverage/project.html
 
-# === Build ========================================================== #
-SOURCES:=$(shell find Autocore -type f -not -path '*/bin/*' -not -path '*/obj/*' -not -name '*.nuspec')
+ASSEMBLIES:=Autocore/bin/Debug/Autocore.dll Autocore.Test/bin/Debug/Autocore.Test.dll
 $(ASSEMBLIES):
 	mdtool build
 
-$(RELEASE): $(SOURCES) update-version
-	@echo "\n===> Building Release binaries\n"
-	@cd Autocore; mdtool build -c:Release
-
-# === Test =========================================================== #
-test: test-results/coverage.cov
-coverage: test-results/coverage/project.html
 test-results/coverage.cov: $(ASSEMBLIES)
 	@echo "\n===> Running tests\n"
 	@mkdir -p test-results/coverage
@@ -37,6 +31,10 @@ show:
 	xdg-open test-results/coverage/project.html
 
 # === Version ======================================================== #
+.PHONY: bump
+VERSION_FILES:=$(shell find -name AssemblyInfo.cs) \
+	$(shell find -name '*.nuspec') \
+	$(shell find -name '*.csproj')
 UPD_FILE:=                                                     \
 	diff $$file.new $$file > /dev/null;                        \
 	if [ $$? -ne 0 ]; then                                     \
@@ -44,60 +42,83 @@ UPD_FILE:=                                                     \
 		mv $$file.new $$file;                                  \
 	else                                                       \
 		rm $$file.new;                                         \
+		touch $$file;                                          \
 	fi
+VERSION_SHELL:=cat Autocore.sln | sed -ne 's/.*version = \([0-9.]*\).*/\1/p'
 
-update-version: Autocore.sln
-	@VER=`cat Autocore.sln | sed -ne 's/.*version = \([0-9.]*\).*/\1/p'`; \
-	echo "Solution version: $$VER";                            \
-	for file in `find -name AssemblyInfo.cs`; do               \
-		sed -e "s/^\[assembly: AssemblyVersion.*/[assembly: AssemblyVersion(\"$$VER.*\")]/" \
+$(VERSION_FILES): Autocore.sln
+	@VER=`$(VERSION_SHELL)`;                                   \
+	file=$@;                                                   \
+	if `echo $$file | grep 'AssemblyInfo.cs' > /dev/null`; then \
+		sed -e "s/^\[assembly: AssemblyVersion.*/[assembly: AssemblyVersion(\"$$VER.0\")]/" \
 		    -e "s/^\[assembly: AssemblyFileVersion.*/[assembly: AssemblyFileVersion(\"$$VER.0\")]/" \
-		$$file > $$file.new; \
+		    $$file > $$file.new;                               \
 		$(UPD_FILE);                                           \
-	done;                                                      \
-	for file in `find -name '*.nuspec'`; do                    \
-		sed -e "s/<version>.*<\/version>/<version>$$VER<\/version>/" $$file > $$file.new; \
+	fi;                                                        \
+	if `echo $$file | grep '\.nuspec$$' > /dev/null`; then     \
+		sed -e "s/<version>.*<\/version>/<version>$$VER<\/version>/" \
+		    -e "s/\(<dependency id=\"Autocore\".* version=\"\)[^\"]*\(\".*\)/\1$$VER\2/" \
+		    $$file > $$file.new;                               \
 		$(UPD_FILE);                                           \
-	done;                                                      \
-	for file in `find -name '*.csproj'`; do                    \
+	fi;                                                        \
+	if `echo $$file | grep '\.csproj$$' > /dev/null`; then     \
 		sed -e "s/<ReleaseVersion>.*<\/ReleaseVersion>/<ReleaseVersion>$$VER<\/ReleaseVersion>/" $$file > $$file.new; \
 		$(UPD_FILE);                                           \
-	done
+	fi
 
 bump:
-	@VER=`cat Autocore.sln | sed -ne 's/.*version = \([0-9.]*\).*/\1/p'`; \
+	@VER=`$(VERSION_SHELL)`;                                   \
 	echo "Current version: $$VER";                             \
 	echo "New version: ${VERSION}";                            \
 	file=Autocore.sln;                                         \
 	sed -e "s/version = \([0-9.]*\)/version = ${VERSION}/" $$file > $$file.new; \
 	$(UPD_FILE)
 
+# === Release ======================================================== #
+.PHONY: release
+
+SOURCES:=$(shell find -type f -path './Autocore*' -not -path '*/bin/*' -not -path '*/obj/*' -not -name '*.nuspec')
+RELEASE_FILES:=$(shell find -type d -path './Autocore*' -prune -printf "%f/bin/Release/%f.dll\n")
+release: $(RELEASE_FILES)
+
+
+$(RELEASE_FILES): $(SOURCES)
+	@echo "\n===> Building Release binaries for $@\n"
+	@mdtool build -c:Release -p:`echo $@ | sed -e 's|/bin/.*||'`
+
 # === Package ======================================================== #
-VERSION=$(shell cat Autocore/Autocore.nuspec | sed -ne 's/.*<version>\(.*\)<\/version>.*/\1/p')
-PACKAGE=pkg/Autocore.$(VERSION).nupkg
+.PHONY: package push-package
+PKG_SPECS:=$(shell find -name 'package.nuspec')
+PKG_VER=$(shell $(VERSION_SHELL))
+PKG_BIN=$(patsubst ./%/package.nuspec,pkg/%.$(PKG_VER).nupkg,$(PKG_SPECS))
 
-package: $(PACKAGE)
-$(PACKAGE): Autocore/Autocore.nuspec $(RELEASE)
-	@echo "\n===> Packaging binaries\n"
+package: $(PKG_BIN)
+
+$(PKG_BIN) : pkg/%.$(PKG_VER).nupkg : %/package.nuspec $(RELEASE_FILES)
+	@echo "\n===> Packaging binaries: $@ from $<\n"
 	@mkdir -p pkg
-	@cd pkg; ../$(MONO)/bin/mono ../$(NUGET) pack ../Autocore/Autocore.nuspec -Verbosity detailed
+	@cd pkg; ../$(MONO)/bin/mono ../$(NUGET) pack ../$< -Verbosity detailed
 
-push-package: $(PACKAGE)
-	XDG_CONFIG_HOME=~/.mono $(MONO)/bin/mono $(NUGET) push $< -Verbosity detailed
+push-package: $(PKG_BIN)
+	@for file in $^; do                                        \
+		echo XDG_CONFIG_HOME=~/.mono $(MONO)/bin/mono $(NUGET) push $$file -Verbosity detailed; \
+	done
 
 # === Clean ========================================================== #
-BINARIES:=$(shell find \( -name 'bin' -o -name 'obj' \) -a -type d)
+.PHONY: clean
+CLEAN_BINARIES:=$(shell find \( -name 'bin' -o -name 'obj' \) -a -type d)
 clean:
-	@if [ ! -z "$(BINARIES)" ]; then \
+	@if [ ! -z "$(CLEAN_BINARIES)" ]; then \
 		echo Will remove: ;\
 		echo -n '  - ' ;\
-		echo $(BINARIES) | sed -e 's/ /\n  - /g' ; \
-		rm -rI $(BINARIES); \
+		echo $(CLEAN_BINARIES) | sed -e 's/ /\n  - /g' ; \
+		rm -rI $(CLEAN_BINARIES); \
 	fi
-	rm -f $(PACKAGE)
+	rm -f pkg/*
 	rm -rf test-results
 
 # === Samples ======================================================== #
+.PHONY: samples
 samples:
 	. $(MONO)/mono-env; \
 	cd Samples; \
