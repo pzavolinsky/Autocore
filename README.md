@@ -300,7 +300,7 @@ using (var container = Autocore.Factory.Create())
 	
 	container.ExecuteInVolatileScope(scope => {
 	  // volatile scope
-  	var v  = scope.Resolve<IMyVolatile>(); // OK!
+  	var v2 = scope.Resolve<IMyVolatile>(); // OK!
 		op.Work(); // Work() can call Volatile<T>.Value
 	});
 }
@@ -334,6 +334,9 @@ Registers dependencies in specified assemblies.
  
 ##### Create from an ```Autofac.ContainerBuilder```
 ```C#
+using Autocore.Implementation; // pull in container builder extensions
+// ...
+
 var assemblies = new Assembly[] { ... }; // AppDomain.CurrentDomain.GetAssemblies();
 
 var builder = new ContainerBuilder();
@@ -347,6 +350,9 @@ Constructs an ```Autocore.IContainer``` from a custom ```Autofac.ContainerBuilde
 
 ##### Create from a specific list of types
 ```C#
+using Autocore.Implementation; // pull in container builder extensions
+// ...
+
 var types = new Type[] { ... };
 
 var builder = new ContainerBuilder();
@@ -358,3 +364,168 @@ var container = new Autocore.Implementation.Container(builder.Build());
 ```
 Constructs an ```Autocore.IContainer``` from a custom ```Autofac.ContainerBuilder``` and registers the specified dependency types.
 
+Autocore for existing projects
+------------------------------
+
+If you are trying to integrate Autocore to an existing project, this section might give you some ideas on how to approach the integration.
+
+Whenever possible, using a pre-configured Autocore integration module for [ASP.NET MVC](#mvc-integration) or [WebAPI](#webapi-integration) will save you some headache.
+
+If no suitable pre-configured module exists, your first task is to choose an integration strategy:
+
+* Top-down integration: start from your project's highest abstraction (e.g. the entry-point class) and work your way down to its component classes.
+* Bottom-up integration: start from small isolated/decoupled components and work your up to its client components.
+* Hybrid integration: do top-down and bottom-up at the same time.
+
+##### Top-down integration
+
+You can start this integration by wrapping your project entry-point classes behind an ```ISingletonDependency``` and then resolve them using an Autocore factory.
+
+For example:
+
+```C#
+// before:
+public static class MyEntryPointClass
+{
+  public static void DoStuff()
+  {
+    new SomeClass().DoSomeStuff();
+    new OtherClass().DoMoreStuff();
+  }
+}
+MyEntryPointClass.DoStuff();
+
+// after:
+public interface IEntryPoint : ISingletonDependency { void DoStuff();     }
+public interface ISomeClass  : ISingletonDependency { void DoSomeStuff(); }
+public class MyEntryPointClass : IEntryPoint
+{
+  ISomeClass  _some;
+  public MyEntryPointClass(ISomeClass some)
+  {
+    _some  = some;
+  }
+  public void DoStuff()
+  {
+    _some.DoSomeStuff();
+    new OtherClass().DoMoreStuff(); // still pending integration
+  }
+}
+
+using (var container = Autocore.Factory.Create())
+{
+  container.Resolve<IEntryPoint>().DoStuff();
+}
+```
+
+After the entry-point class is resolving dependencies, you can move to its constituent components (e.g. ```SomeClass```, ```OtherClass```, etc.).
+
+Two important things to notice are:
+
+* The starting point of a per-operation (e.g. per-request) call.
+* The ending point of a per-operation (e.g. per-request) call.
+
+If both points are inside the same method, consider wrapping the per-operation call in a ```container.ExecuteInVolatileScope``` call:
+
+```C#
+class SomeClass : ISomeInterface // : where ISomeInterface : ISingletonDependency
+{
+  IContainer _container;
+  public SomeClass(IContainer container)
+  {
+    _container = container;
+  }
+  public void HandleRequest(RequestContext ctx)
+  {
+    _container.ExecuteInVolatileScope((scope) => {
+      // per-request code goes here
+      // use scope.Resolve<> to set/access per-request volatiles
+      // ...
+    });
+  }
+}
+```
+
+Otherwise, consider creating a volatile scope when the per-operation call begins and dispose it when it ends.
+
+##### Bottom-up integration
+
+You can start by identifying a more-or-less isolated portion of your project (e.g. a third-party service client, a small rule or validation engine, etc.) and migrating that whole sub-system to an injected dependency tree.
+
+Update your project's entry-point to create and cache the *root* container.
+
+Finally, update the client code for your sub-system to resolve the sub-system through the cached *root* container.
+
+For example:
+```C#
+// before:
+public interface IEmailValdation { bool IsValid(string email); }
+public class EmailValidation : IEmailValdation
+{
+  IRegexEmailValidation _regex;
+  IConfirmationEmailValidation _confirmation;
+
+  public EmailValidation()
+  {
+    _regex = new RegexEmailValidation();
+    _confirmation = new ConfirmationEmailValidation();
+  }
+
+  public bool IsValid(string email)
+  {
+    return _regex.Validate(email) && _confirmation.Validate(email);
+  }
+}
+
+public class PersonValidation
+{
+  IEmailValdation _emailValidation;
+  public PersonValidation()
+  {
+    _emailValidation = new EmailValidation();
+  }
+  // ...
+}
+
+// after
+public interface IEmailValdation : ISingletonDependency { bool IsValid(string email); }
+public class EmailValidation : IEmailValdation
+{
+  IRegexEmailValidation _regex;
+  IConfirmationEmailValidation _confirmation;
+
+  public EmailValidation(IRegexEmailValidation regex, IConfirmationEmailValidation confirmation)
+  {
+    _regex = regex;
+    _confirmation = confirmation;
+  }
+
+  public bool IsValid(string email)
+  {
+    return _regex.Validate(email) && _confirmation.Validate(email);
+  }
+}
+
+public class PersonValidation
+{
+  IEmailValdation _emailValidation;
+  public PersonValidation()
+  {
+    _emailValidation = MyEntryPointClass.Container.Resolve<IEmailValdation>();
+  }
+  // ...
+}
+
+public static class MyEntryPointClass
+{
+  public static void DoStuff()
+  {
+    Container = Autocore.Factory.Create();
+    new SomeClass().DoSomeStuff(); // this call will eventually create a PersonValidation
+    // ...
+  }
+
+  // root container cache
+  public static Autocore.IContainer Container { get; private set; }
+}
+```
