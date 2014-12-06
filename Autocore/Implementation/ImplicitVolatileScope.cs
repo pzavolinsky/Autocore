@@ -51,7 +51,7 @@ namespace Autocore.Implementation
 		/// <remarks>Pops the current volatile scope from the implicit context and disposes the scope.</remarks>
 		public void Dispose()
 		{
-			_context.Container.Dispose();
+			Container.Dispose();
 			_context.Container = _lastScope;
 		}
 
