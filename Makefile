@@ -8,27 +8,31 @@ NUGET:=../NuGet.exe
 
 # === Test =========================================================== #
 .PHONY: test show
-test: test-results/coverage.cov
-coverage: test-results/coverage/project.html
 
 ASSEMBLIES:=Autocore/bin/Debug/Autocore.dll Autocore.Test/bin/Debug/Autocore.Test.dll
-$(ASSEMBLIES):
-	mdtool build
+$(ASSEMBLIES): $(shell find Autocore.Test -name '*.cs')
+	mdtool build -c:Debug
 
-test-results/coverage.cov: $(ASSEMBLIES)
-	@echo "\n===> Running tests\n"
-	@mkdir -p test-results/coverage
-	@. $(MONO)/mono-env
-	@LD_LIBRARY_PATH=$(MONO)/lib mono --debug --profile=monocov:outfile=test-results/coverage.cov,+[Autocore] $(MONO)/lib/mono/4.5/nunit-console.exe Autocore.Test/bin/Debug/Autocore.Test.dll
+test-results/coverage.covcfg: Autocore.Test/coverage.covcfg; mkdir -p test-results; cp $< $@
+test-results/coverage.covcfg.covdb: test-results/coverage.covcfg $(ASSEMBLIES)
+	@. $(MONO)/mono-env;\
+	BABOON_CFG=$(shell pwd)/test-results/coverage.covcfg mono  ../mono-af/XR.Baboon-master/covtool/bin/covem.exe $(MONO)/lib/mono/4.5/nunit-console.exe Autocore.Test/bin/Debug/Autocore.Test.dll -labels
 	@mv TestResult.xml test-results
 
-test-results/coverage/project.html: test-results/coverage.cov
-	@echo "\n===> Computing code coverage\n"
-	@MONO_PATH=Autocore.Test/bin/Debug $(MONO)/bin/monocov --export-html=test-results/coverage test-results/coverage.cov
-	@xdg-open $@
+test-results/html/index.html: test-results/coverage.covcfg.covdb
+	(cd test-results; mono  ../../mono-af/XR.Baboon-master/covtool/bin/cov-html.exe ../$< Autocore)
+
+coverage: test-results/html/index.html
+
+test: $(ASSEMBLIES)
+	@echo "\n===> Running tests\n"
+	@mkdir -p test-results/coverage
+	@. $(MONO)/mono-env;\
+	mono $(MONO)/lib/mono/4.5/nunit-console.exe Autocore.Test/bin/Debug/Autocore.Test.dll -labels
+	@mv TestResult.xml test-results
 
 show:
-	xdg-open test-results/coverage/project.html
+	xdg-open test-results/html/index.html
 
 # === Version ======================================================== #
 .PHONY: bump

@@ -52,6 +52,14 @@
     <Compile Include="VolatileContainerTest.cs" />
     <Compile Include="ImplicitVolatileScopeTest.cs" />
     <Compile Include="VolatileTest.cs" />
+    <Compile Include="FactoryTest.cs" />
+    <Compile Include="IntegrationTest.cs" />
+    <Compile Include="IntegrationBase.cs" />
+    <Compile Include="Integration\InstanceTest.cs" />
+    <Compile Include="Integration\SingletonTest.cs" />
+    <Compile Include="Integration\GenericSingletonTest.cs" />
+    <Compile Include="Integration\VolatileTest.cs" />
+    <Compile Include="Integration\AsyncTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -62,5 +70,8 @@
       <Project>{6C2E8ECC-A9C1-4A2E-8D4E-6EA1F71B1126}</Project>
       <Name>Autocore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Integration\" />
   </ItemGroup>
 </Project>

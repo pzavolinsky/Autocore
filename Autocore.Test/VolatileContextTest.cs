@@ -4,6 +4,7 @@ using Moq;
 using NUnit.Framework;
 using Autocore.Interfaces;
 using Autocore.Implementation;
+using System.Collections.Generic;
 
 namespace Autocore.Test
 {
@@ -12,7 +13,7 @@ namespace Autocore.Test
 		public interface IVolatileObject : IVolatileDependency {}
 
 		[Test]
-		public void ResolveTest()
+		public void Resolve()
 		{
 			var implicitContext = Create<IImplicitContext>();
 			var volatileContext = new VolatileContext(implicitContext.Object);
@@ -23,6 +24,40 @@ namespace Autocore.Test
 			implicitContext.SetupGet(o => o.Container).Returns(container.Object);
 
 			Assert.AreEqual(volatileObject, volatileContext.Resolve<IVolatileObject>());
+		}
+
+		[Test]
+		public void ResolveEnumerable()
+		{
+			var implicitContext = Create<IImplicitContext>();
+			var volatileContext = new VolatileContext(implicitContext.Object);
+			var container = Create<IVolatileContainer>();
+			var volatileObject = Create<List<IVolatileObject>>().Object;
+
+			container.Setup(o => o.ResolveEnumerable<IVolatileObject>()).Returns(volatileObject);
+			implicitContext.SetupGet(o => o.Container).Returns(container.Object);
+
+			Assert.AreEqual(volatileObject, volatileContext.ResolveEnumerable<IVolatileObject>());
+		}
+
+		[Test]
+		public void ResolveOutsideOfVolatileScope()
+		{
+			var implicitContext = Create<IImplicitContext>();
+			var volatileContext = new VolatileContext(implicitContext.Object);
+			implicitContext.SetupGet(o => o.Container).Returns((IVolatileContainer) null);
+
+			Assert.Throws<InvalidOperationException>(() => volatileContext.Resolve<IVolatileObject>());
+		}
+
+		[Test]
+		public void ResolveEnumerableOutsideOfVolatileScope()
+		{
+			var implicitContext = Create<IImplicitContext>();
+			var volatileContext = new VolatileContext(implicitContext.Object);
+			implicitContext.SetupGet(o => o.Container).Returns((IVolatileContainer) null);
+
+			Assert.Throws<InvalidOperationException>(() => volatileContext.ResolveEnumerable<IVolatileObject>());
 		}
 	}
 }

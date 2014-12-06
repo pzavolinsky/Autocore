@@ -3,6 +3,7 @@ using Autofac;
 using Autocore.Implementation;
 using Moq;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Autocore.Test
 {
@@ -36,6 +37,23 @@ namespace Autocore.Test
 
 			Assert.AreEqual(nonVolatileObject, container.Resolve<INonVolatileObject>());
 		}
+
+		[Test]
+		public void ResolveEnumerable()
+		{
+			var nonVolatileObjects = Create<List<INonVolatileObject>>().Object;
+			var componentRegistration = Create<Autofac.Core.IComponentRegistration>().Object;
+			var componentRegistry = Create<Autofac.Core.IComponentRegistry>();
+			componentRegistry.Setup(o => o.TryGetRegistration(It.IsAny<Autofac.Core.TypedService>(), out componentRegistration)).Returns(true);
+			var scope = Create<ILifetimeScope>();
+			scope.Setup(o => o.ComponentRegistry).Returns(componentRegistry.Object);
+			scope.Setup(o => o.ResolveComponent(componentRegistration, It.IsAny<Autofac.Core.Parameter[]>())).Returns(nonVolatileObjects);
+
+			var container = new Container(scope.Object);
+
+			Assert.AreEqual(nonVolatileObjects, container.ResolveEnumerable<INonVolatileObject>());
+		}
+
 
 		[Test]
 		public void CreateScope()
