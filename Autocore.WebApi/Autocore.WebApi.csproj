@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <ProductVersion>12.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ReleaseVersion>1.2.2</ReleaseVersion>
+    <ReleaseVersion>1.2.3</ReleaseVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Autocore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
