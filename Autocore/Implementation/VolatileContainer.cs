@@ -22,6 +22,7 @@
 // 
 using Autocore.Interfaces;
 using Autofac;
+using System.Collections.Generic;
 
 namespace Autocore.Implementation
 {
@@ -40,6 +41,12 @@ namespace Autocore.Implementation
 		public T Resolve<T>() where T : IDependency
 		{
 			return Scope.Resolve<T>();
+		}
+
+		/// <see cref="Autocore.Interfaces.IVolatileContainer.ResolveEnumerable&lt;T&gt;"/>
+		public IEnumerable<T> ResolveEnumerable<T>() where T : IDependency
+		{
+			return Scope.Resolve<IEnumerable<T>>();
 		}
 	}
 }

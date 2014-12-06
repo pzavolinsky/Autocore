@@ -21,6 +21,7 @@
 // SOFTWARE.
 // 
 using Autocore.Interfaces;
+using System.Collections.Generic;
 
 namespace Autocore
 {
@@ -35,5 +36,11 @@ namespace Autocore
 		/// </summary>
 		/// <typeparam name="T">The service type to be resolved.</typeparam>
 		T Resolve<T>() where T : INonVolatileDependency;
+
+		/// <summary>
+		/// Resolves a collection of instances of the non-volatile service T.
+		/// </summary>
+		/// <typeparam name="T">The service type to be resolved.</typeparam>
+		IEnumerable<T> ResolveEnumerable<T>() where T : INonVolatileDependency;
 	}
 }

@@ -22,6 +22,7 @@
 // 
 using System;
 using Autocore.Interfaces;
+using System.Collections.Generic;
 
 namespace Autocore.Implementation
 {
@@ -50,5 +51,16 @@ namespace Autocore.Implementation
 			}
 			return _context.Container.Resolve<T>();
 		}
+
+		/// <see cref="Autocore.Interfaces.IVolatileContext.ResolveEnumerable&lt;T&gt;"/>
+		public IEnumerable<T> ResolveEnumerable<T>() where T : IVolatileDependency
+		{
+			if (_context.Container == null)
+			{
+				throw new InvalidOperationException("Attempted to access a volatile dependency outside a volatile scope. Consider wrapping this code in a call to IContainer.ExecuteInVolatileScope");
+			}
+			return _context.Container.ResolveEnumerable<T>();
+		}
+
 	}
 }

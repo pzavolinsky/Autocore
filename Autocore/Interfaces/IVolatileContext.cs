@@ -20,6 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // 
+using System.Collections.Generic;
+
+
 namespace Autocore.Interfaces
 {
 	/// <summary>
@@ -32,5 +35,11 @@ namespace Autocore.Interfaces
 		/// </summary>
 		/// <typeparam name="T">The service type to be resolved.</typeparam>
 		T Resolve<T>() where T : IVolatileDependency;
+
+		/// <summary>
+		/// Resolves a collection of instances of the non-volatile service T.
+		/// </summary>
+		/// <typeparam name="T">The service type to be resolved.</typeparam>
+		IEnumerable<T> ResolveEnumerable<T>() where T : IVolatileDependency;
 	}
 }

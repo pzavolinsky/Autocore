@@ -21,6 +21,7 @@
 // SOFTWARE.
 // 
 using Autofac;
+using System.Collections.Generic;
 
 namespace Autocore.Implementation
 {
@@ -39,6 +40,12 @@ namespace Autocore.Implementation
 		public T Resolve<T>() where T : INonVolatileDependency
 		{
 			return Scope.Resolve<T>();
+		}
+
+		/// <see cref="Autocore.IContainer.ResolveEnumerable&lt;T&gt;"/>
+		public IEnumerable<T> ResolveEnumerable<T>() where T : INonVolatileDependency
+		{
+			return Scope.Resolve<IEnumerable<T>>();
 		}
 	}
 }
