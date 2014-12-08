@@ -374,7 +374,7 @@ Whenever possible, using a pre-configured Autocore integration module for [ASP.N
 If no suitable pre-configured module exists, your first task is to choose an integration strategy:
 
 * Top-down integration: start from your project's highest abstraction (e.g. the entry-point class) and work your way down to its component classes.
-* Bottom-up integration: start from small isolated/decoupled components and work your up to its client components.
+* Bottom-up integration: start from small isolated/decoupled components and work your way up to its client components.
 * Hybrid integration: do top-down and bottom-up at the same time.
 
 ##### Top-down integration
