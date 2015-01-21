@@ -92,6 +92,6 @@ Global
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Autocore\Autocore.csproj
-		version = 1.2.3
+		version = 1.2.4
 	EndGlobalSection
 EndGlobal

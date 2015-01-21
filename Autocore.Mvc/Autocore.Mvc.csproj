@@ -10,7 +10,7 @@
     <RootNamespace>Autocore.Mvc</RootNamespace>
     <AssemblyName>Autocore.Mvc</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <ReleaseVersion>1.2.3</ReleaseVersion>
+    <ReleaseVersion>1.2.4</ReleaseVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Autocore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
