@@ -22,10 +22,12 @@
 // 
 using Autocore.Implementation;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using Autocore.Interfaces;
 
 namespace Autocore.WebApi
 {
@@ -34,23 +36,39 @@ namespace Autocore.WebApi
 	/// </summary>
 	public class VolatileActionFilter : ActionFilterAttribute, ISingletonDependency
 	{
+        /// <summary>
+        /// A listener that can configure volatile context into the current volatile scope.
+        /// </summary>
+        public interface IListener : ISingletonDependency
+        {
+            /// <summary>
+            /// Configures a volatile container with information extracted from an HTTP action context.
+            /// </summary>
+            /// <param name="container">The volatile container.</param>
+            /// <param name="context">The current HTTP action context.</param>
+            void Configure(IVolatileContainer container, HttpActionContext context);
+        }
+
 		/// <summary>
 		/// Request context key that stores the volatile scope.
 		/// </summary>
 		public const string PROPERTY_KEY = "__autocore_scope__";
 
-		IContainer _container;
+	    readonly IContainer _container;
+	    private readonly IEnumerable<IListener> _listeners;
 
-		/// <summary>
-		/// Initializes a new volatile action filter instance.
-		/// </summary>
-		/// <param name="container">Container.</param>
-		public VolatileActionFilter(IContainer container)
-		{
-			_container = container;
-		}
+	    /// <summary>
+	    /// Initializes a new volatile action filter instance.
+	    /// </summary>
+	    /// <param name="container">Container.</param>
+	    /// <param name="listeners">A list of volatile scope listeners</param>
+	    public VolatileActionFilter(IContainer container, IEnumerable<IListener> listeners)
+	    {
+	        _container = container;
+	        _listeners = listeners.ToArray();
+	    }
 
-		/// <summary>
+	    /// <summary>
 		/// Occurs before the action method is invoked.
 		/// </summary>
 		/// <param name="actionContext">The action context.</param>
@@ -108,7 +126,15 @@ namespace Autocore.WebApi
 			{
 				stack = actionContext.Request.Properties[PROPERTY_KEY] as Stack<ImplicitVolatileScope>;
 			}
-			stack.Push(new ImplicitVolatileScope(_container));
+
+		    var scope = new ImplicitVolatileScope(_container);
+
+		    foreach (var listener in _listeners)
+		    {
+		        listener.Configure(scope.Container, actionContext);
+		    }
+
+			stack.Push(scope);
 		}
 
 		/// <summary>

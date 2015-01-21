@@ -89,7 +89,7 @@ namespace Autocore.Implementation
 				    svc != _instanceDependency &&
 				    svc != _singletonDependency && 
 				    svc != _volatileDependency) {
-					if (svc.IsGenericType && !svc.IsGenericTypeDefinition) {
+					if (svc.IsGenericType && !svc.IsGenericTypeDefinition && comp.IsGenericType) {
 						reg.As(svc.GetGenericTypeDefinition());
 					} else {
 						reg.As(svc);

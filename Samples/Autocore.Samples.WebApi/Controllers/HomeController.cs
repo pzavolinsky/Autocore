@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Autocore.Samples.WebApi.Models;
 
 namespace Autocore.Samples.WebApi.Controllers
 {
@@ -13,7 +14,7 @@ namespace Autocore.Samples.WebApi.Controllers
 	}
 	public class RandomGreeting : IRandomGreeting
 	{
-		static string[] GREETINGS = { "Hi", "Hello", "Whassup!", "Yo" };
+		static readonly string[] GREETINGS = { "Hi", "Hello", "Whassup!", "Yo" };
 		public RandomGreeting()
 		{
 			Greeting = GREETINGS[new Random().Next(GREETINGS.Length)];
@@ -26,12 +27,16 @@ namespace Autocore.Samples.WebApi.Controllers
 	}
 	public class HelloMessage : IHelloMessage
 	{
-		Volatile<IRandomGreeting> _greeting;
-		public HelloMessage(Volatile<IRandomGreeting> greeting)
-		{
-			_greeting = greeting;
-		}
-		public string Message
+	    private readonly Volatile<IRandomGreeting> _greeting;
+	    private readonly Volatile<Tenant> _tenant;
+
+	    public HelloMessage(Volatile<IRandomGreeting> greeting, Volatile<Tenant> tenant)
+	    {
+	        _greeting = greeting;
+	        _tenant = tenant;
+	    }
+
+	    public string Message
 		{
 			get
 			{
@@ -40,10 +45,13 @@ namespace Autocore.Samples.WebApi.Controllers
 					"\n" +
 					"My name is {1} (should always be same, since I'm a singleton)\n" +
 					"\n" +
-					"My greeter instance is {2} (show change with each request) and it always greets you with '{3}'",
+					"My greeter instance is {2} (show change with each request) and it always greets you with '{3}'\n" +
+					"\n" +
+					"Tenant name is '{4}'",
 					_greeting.Value.Greeting,
 					GetHashCode(),
-					_greeting.Value.GetHashCode(), _greeting.Value.Greeting);
+					_greeting.Value.GetHashCode(), _greeting.Value.Greeting,
+                    _tenant.Value.Name);
 			}
 		}
 	}
