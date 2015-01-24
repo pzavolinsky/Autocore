@@ -62,6 +62,44 @@ namespace HelloWorld
 }
 ```
 
+Why should I use this?
+----------------------
+
+In my experience, designing applications to enforce inversion of control through dependency injection has many practical advantages such as promoting modularity, loose-coupling, maintainability and testability. These days, building an enterprise app without a dependency injection container feels like leaving my house without my pants on.
+
+If you are unsure whether dependency injection is for you, you should google around a bit and then make an informed decision. From this point on, I'll assume you have decided to use DI in your project.
+
+The question remains, why should I use Autocore when my DI container works perfectly fine?
+
+While I think DI containers are a *must* in middle/big applications, their configuration can become a burden to the point of discouraging modular decomposition. I'm talking about the bootstrapping and container configuration code. This code (sometimes expressed as XML configuration) is usually a never-ending list of service-to-component (i.e. interface-to-implementation) mappings, such as:
+
+```C#
+using Autofac;
+
+var builder = new ContainerBuilder();
+
+builder.RegisterType<MyComponent>().AsSelf();
+builder.RegisterType<MyOtherComponent>().As<ISomeService>().As<ISomeOtherService>();
+builder.RegisterGeneric(typeof(MyGenericComponent<>)).As(typeof(IMyGenericService<>));
+// ... this list can go on forever
+
+var container = builder.Build();
+```
+
+The list can indeed go on forever, but that (annoying as it is to maintain) is not the main issue. Every time you create a new service/component you have to remember to go to the bootstrapping code (or XML config) and register it for DI, otherwise you'll get obscure runtime errors about classes lacking default constructors and injectors failing.
+
+Initially this might not look like a real problem but, in my experience, it creates a psychological resistance against building new components and separating concerns. Even if that is not the case, the need for additional component/service registration forces you to divert your attention form the task at hand in order to focus on the non-functional task of registering your component in a code that, sooner or later, starts looking like spaghetti.
+
+Autocore helps you solve this problem by eliminating bootstrapping. Using marker interfaces and conventions you get all your services and components registered with a single line of code:
+
+```C#
+var container = Autocore.Factory.Create()
+```
+
+Granted, there are some complex scenarios where manual wiring of service-to-component mappings might be the only way to go. But even in edge cases you can still leverage Autocore by using automatic registration for the simple mappings and manually registering the exceptions (see [The Factory façade](#the-factory-fa%C3%A7ade) for more details).
+
+If you are considering adding Autocore to an existing project, see [Autocore for existing projects](#autocore-for-existing-projects) for some ideas on where to start.
+
 Integrations
 ------------
 
@@ -124,7 +162,6 @@ public static class WebApiConfig
 ```
 
 After this setup you can start injecting dependencies to your regular Api controllers. Check [Samples/Autocore.Samples.WebApi](https://github.com/pzavolinsky/Autocore/tree/master/Samples/Autocore.Samples.WebApi) for a complete example.
-
 
 Basic concepts
 --------------
