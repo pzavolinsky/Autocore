@@ -602,11 +602,9 @@ To fix this error, simply store the ```IVolatile<T>``` in a field and call its `
 whenever you need to access the actual volatile value:
 
 ```C#
-  public interface IVolatileService : IVolatileDependency {}
-  public class VolatileService : IVolatileService {}
   public class TriesToHackAVolatile : ISingletonDependency
   {
-    private IVolatile<IVolatileService> _svc; // wrong!
+    private IVolatile<IVolatileService> _svc; // right!
     public TriesToHackAVolatile(IVolatile<IVolatileService> svc)
     {
       _svc = svc;
