@@ -1,17 +1,15 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Autocore.Samples.HelloWorld
 {
-	public interface IGreeting : ISingletonDependency
+	public interface IVolatileService : IVolatileDependency {}
+	public class VolatileService : IVolatileService {}
+	public class BreaksVolatile : ISingletonDependency
 	{
-		string Message { get; }
-	}
-
-	public class Greeting : IGreeting
-	{
-		public string Message
+		public BreaksVolatile(IVolatileService svc) // throws
 		{
-			get { return "Hello World!"; }
 		}
 	}
 
@@ -21,8 +19,7 @@ namespace Autocore.Samples.HelloWorld
 		{
 			using (var container = Autocore.Factory.Create())
 			{
-				var greeting = container.Resolve<IGreeting>();
-				System.Console.WriteLine(greeting.Message);
+				container.Resolve<BreaksVolatile>();
 			}
 		}
 	}

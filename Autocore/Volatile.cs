@@ -70,7 +70,20 @@ namespace Autocore
 	/// 	}
 	/// }
 	/// </example>
-	public class Volatile<T> : ISingletonDependency where T : IVolatileDependency
+	public interface IVolatile<out T> : ISingletonDependency where T : IVolatileDependency
+	{
+		/// <summary>
+		/// Gets the volatile value.
+		/// </summary>
+		/// <value>The value.</value>
+		/// <remarks>
+		/// DO NOT call Value in the constructor of a singleton service! 
+		/// </remarks>
+		T Value { get; }
+	}
+
+	/// <see cref="Autocore.IVolatile&lt;T&gt;"/>
+	public class Volatile<T> : IVolatile<T> where T : IVolatileDependency
 	{
 		IVolatileContext _context;
 
@@ -83,13 +96,7 @@ namespace Autocore
 			_context = context;
 		}
 
-		/// <summary>
-		/// Gets the volatile value.
-		/// </summary>
-		/// <value>The value.</value>
-		/// <remarks>
-		/// DO NOT call Value in the constructor of a singleton service! 
-		/// </remarks>
+		/// <see cref="Autocore.IVolatile&lt;T&gt;"/>
 		public T Value 
 		{
 			get { return _context.Resolve<T>(); }

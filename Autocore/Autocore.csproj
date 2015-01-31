@@ -59,6 +59,7 @@
     <Compile Include="Interfaces\IImplicitContext.cs" />
     <Compile Include="Interfaces\IVolatileContainer.cs" />
     <Compile Include="Interfaces\IVolatileContext.cs" />
+    <Compile Include="Exceptions\VolatileResolutionException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -67,5 +68,6 @@
   <ItemGroup />
   <ItemGroup>
     <Folder Include="Interfaces\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 </Project>

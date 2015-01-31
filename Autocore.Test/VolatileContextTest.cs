@@ -47,7 +47,7 @@ namespace Autocore.Test
 			var volatileContext = new VolatileContext(implicitContext.Object);
 			implicitContext.SetupGet(o => o.Container).Returns((IVolatileContainer) null);
 
-			Assert.Throws<InvalidOperationException>(() => volatileContext.Resolve<IVolatileObject>());
+			Assert.Throws<VolatileResolutionException>(() => volatileContext.Resolve<IVolatileObject>());
 		}
 
 		[Test]
@@ -57,8 +57,7 @@ namespace Autocore.Test
 			var volatileContext = new VolatileContext(implicitContext.Object);
 			implicitContext.SetupGet(o => o.Container).Returns((IVolatileContainer) null);
 
-			Assert.Throws<InvalidOperationException>(() => volatileContext.ResolveEnumerable<IVolatileObject>());
+			Assert.Throws<VolatileResolutionException>(() => volatileContext.ResolveEnumerable<IVolatileObject>());
 		}
 	}
 }
-

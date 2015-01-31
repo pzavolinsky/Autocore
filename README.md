@@ -245,8 +245,8 @@ public class MyPerRequestContext : IMyPerRequestContext
 public interface ISomeSingletonService : ISingletonDependency { ... }
 class MySingletonService : ISomeSingletonService
 {
-  Volatile<IMyPerRequestContext> _ctx;
-  public MySingletonService(Volatile<IMyPerRequestContext> ctx)
+  IVolatile<IMyPerRequestContext> _ctx;
+  public MySingletonService(IVolatile<IMyPerRequestContext> ctx)
   {
     _ctx = ctx;
   }
@@ -267,13 +267,13 @@ Admittedly, this snippet is a bit more complex that the previous one, but the ad
   }
   ```
 
-* Any call to ```Volatile<T>.Value``` outside a volatile scope fails with a runtime exception. For example:
+* Any call to ```IVolatile<T>.Value``` outside a volatile scope fails with a runtime exception. For example:
 
   ```c#
   class HackishService : ISomeSingletonService
   {
     string _userAgent;
-    public HackishService(Volatile<IMyPerRequestContext> ctx)
+    public HackishService(IVolatile<IMyPerRequestContext> ctx)
     {
       _userAgent = ctx.Value.UserAgent // Runtime exception (outside a volatile scope)
     }
@@ -294,11 +294,11 @@ So far we've seen that volatiles will help you avoid scope mismatch issues in yo
 using (var container = Autocore.Factory.Create())
 {
   // root scope
-	var op = container.Resolve<IOperation>(); // ctor cannot call Volatile<T>.Value
+	var op = container.Resolve<IOperation>(); // ctor cannot call IVolatile<T>.Value
 	
 	container.ExecuteInVolatileScope(scope => {
 	  // volatile scope
-		op.Work(); // Work() can call Volatile<T>.Value
+		op.Work(); // Work() can call IVolatile<T>.Value
 	});
 }
 ```
@@ -311,8 +311,8 @@ public interface IMySingleton : ISingletonDependency { void Work(); }
 
 public class MySingleton : IMySingleton
 {
-  Volatile<IMyVolatile> _v;
-  public MySingleton(Volatile<IMyVolatile> v) { _v = v; }
+  IVolatile<IMyVolatile> _v;
+  public MySingleton(IVolatile<IMyVolatile> v) { _v = v; }
   public void Work() { _v.Value.DoVolatile(); }
 }
 
@@ -326,19 +326,19 @@ public class BrokenSingleton : IMySingleton
 public class HackishSingleton : IMySingleton
 {
   IMyVolatile _v;
-  public HackishSingleton(Volatile<IMyVolatile> v) { _v = v.Value; } // throws
+  public HackishSingleton(IVolatile<IMyVolatile> v) { _v = v.Value; } // throws
   public void Work() { _v.DoVolatile(); }
 }
 
 using (var container = Autocore.Factory.Create())
 {
-	var op = container.Resolve<IMySingleton>(); // ctor cannot call Volatile<T>.Value
+	var op = container.Resolve<IMySingleton>(); // ctor cannot call IVolatile<T>.Value
 	var v  = container.Resolve<IMyVolatile>();  // compile-time error
 	
 	container.ExecuteInVolatileScope(scope => {
 	  // volatile scope
   	var v2 = scope.Resolve<IMyVolatile>(); // OK!
-		op.Work(); // Work() can call Volatile<T>.Value
+		op.Work(); // Work() can call IVolatile<T>.Value
 	});
 }
 ```
@@ -566,3 +566,162 @@ public static class MyEntryPointClass
   public static Autocore.IContainer Container { get; private set; }
 }
 ```
+
+Troubleshooting
+---------------
+
+#### VolatileResolutionException: Attempted to access a volatile dependency outside a volatile scope
+If you are getting this error you are either hacking or leaking a volatile dependency.
+
+###### Hacking a volatile dependency
+
+This scenario happens when a singleton class takes a dependency on a ```IVolatile<T>``` but tries to
+get the actual volatile value in the singleton's constructor. This is wrong because the lifetime
+scope of the singleton is longer than the scope of the volatile value (i.e. ```IVolatileDependency```)
+and sooner or later the singleton will be holding a disposed reference of the volatile.
+
+For example:
+
+```C#
+  public interface IVolatileService : IVolatileDependency {}
+  public class VolatileService : IVolatileService {}
+  public class TriesToHackAVolatile : ISingletonDependency
+  {
+    private IVolatileService _svc; // wrong!
+    public TriesToHackAVolatile(IVolatile<IVolatileService> svc)
+    {
+      _svc = svc.Value; // throws
+    }
+  }
+  ...
+  var container = Autocore.Factory.Create();
+  container.Resolve<TriesToHackAVolatile>(); // throws
+```
+
+To fix this error, simply store the ```IVolatile<T>``` in a field and call its ```Value``` property
+whenever you need to access the actual volatile value:
+
+```C#
+  public interface IVolatileService : IVolatileDependency {}
+  public class VolatileService : IVolatileService {}
+  public class TriesToHackAVolatile : ISingletonDependency
+  {
+    private IVolatile<IVolatileService> _svc; // wrong!
+    public TriesToHackAVolatile(IVolatile<IVolatileService> svc)
+    {
+      _svc = svc;
+    }
+    public void MethodCalledInsideAVolatileScope()
+    {
+      // you can safely use _svc.Value here
+    }
+  }
+```
+
+###### Leaking a volatile dependency
+
+This scenario happens when methods of a singleton class return delegates that defer access to a volatile
+value. These delegates are effectively leaking the volatile outside its scope and, when called outside a volatile scope, throw the exception.
+
+For example:
+
+```C#
+  public interface IVolatileService : IVolatileDependency
+  {
+    string Get(int num);
+  }
+  public class VolatileService : IVolatileService
+  {
+    public string Get(int num) { return num.ToString(); }
+  }
+  public class LeaksVolatile : ISingletonDependency
+  {
+    private IVolatile<IVolatileService> _svc;
+    public LeaksVolatile(IVolatile<IVolatileService> svc) { _svc = svc; }
+    public IEnumerable<string> Access()
+    {
+      // The lambda expression in Select is evaluated after
+      // the method returns (and potentially, after the
+      // volatile scope was disposed).
+      return (new[] { 1 }).Select(i => _svc.Value.Get(i));
+    }
+    public Func<string> Delayed(int i)
+    {
+      return () => _svc.Value.Get(i); // wrong, leaks _svc.Value
+    }
+  }
+  ...
+  var container = Autocore.Factory.Create();
+  var client = container.Resolve<LeaksVolatile>();
+  
+  var list = container.ExecuteInVolatileScope((scope) => client.Access());
+  list.ToArray(); // throws (evaluates lambda outside the volatile scope)
+  
+  var callback = container.ExecuteInVolatileScope((scope) => client.Delayed(10));
+  callback(); // throws (evaluates lambda outside the volatile scope)
+```
+
+To fix this error, if the leak was triggered by a Linq expression force the expression evaluation by calling ```ToArray``` or ```ToList``` before returning from the method. If the leak was triggered by an explicit ```Action``` or ```Func``` returned by the method, make sure you call ```IVolatile<T>.Value``` outside the returned delegate.
+
+```C#
+  public class LeaksVolatile : ISingletonDependency
+  {
+    private IVolatile<IVolatileService> _svc;
+    public LeaksVolatile(IVolatile<IVolatileService> svc) { _svc = svc; }
+    public IEnumerable<string> Access()
+    {
+      return (new[] { 1 }).Select(i => _svc.Value.Get(i))
+        .ToArray(); // force expression evaluation here!
+    }
+    public Func<string>Delayed(int i)
+    {
+      var s = _svc.Value.Get(i);
+      return () => s;
+    }
+  }
+```
+
+#### DependencyResolutionException: No scope with a Tag matching '__autocore_volatile__' is visible from the scope in which the instance was requested
+
+If you are getting this error you are breaking dependency scopes.
+
+###### Breaking dependency scopes
+
+This scenario happens when a singleton class takes a direct dependency on a volatile.
+
+For example:
+
+```C#
+  public interface IVolatileService : IVolatileDependency {}
+  public class VolatileService : IVolatileService {}
+  public class BreaksVolatile : ISingletonDependency
+  {
+    public BreaksVolatile(IVolatileService svc) // throws
+    {
+    }
+  }
+  ...
+  var container = Autocore.Factory.Create();
+  container.Resolve<BreaksVolatile>(); // throws
+```
+
+To fix this error, simply wrap the dependency with ```IVolatile<T>``` and call ```IVolatile<T>.Value``` in the singleton methods that need to access the volatile. Keep in mind that you SHOULD NOT call ```Value``` directly in the constructor since that would be [hacking a volatile dependency](#hacking-a-volatile-dependency) and will not work.
+
+```C#
+  public class BreaksVolatile : ISingletonDependency
+  {
+    private IVolatile<IVolatileService> _svc;
+    public BreaksVolatile(IVolatile<IVolatileService> svc) { _svc = svc; }
+    public void DoSomething()
+    {
+      // you can safely use _svc.Value here
+    }
+  }
+```
+
+Mono compatibility
+------------------
+
+Autocore should work fine in Mono projects but there are two considerations you should keep in mind:
+- Mono does not support ASP.NET WebAPI so the [WebApi integration](#webapi-integration) won't work in Mono.
+- Mono 3.10 has a bug in the implementation of ```CallContext.LogicalGetData``` when executing ```async``` code. Until the fix for bug [#24757](https://bugzilla.xamarin.com/show_bug.cgi?id=24757) makes it into a stable release, Autocore will not work for async projects. A workaround for this issue (the one I'm using for Autocore development) is building Mono from source (e.g. ```git clone https://github.com/mono/mono.git```).

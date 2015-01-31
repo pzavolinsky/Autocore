@@ -1,6 +1,8 @@
 using System;
 using Moq;
 using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Autocore.Test.Integration
 {
@@ -14,12 +16,21 @@ namespace Autocore.Test.Integration
 		}
 		public class HackishVolatileClient : ISingletonDependency
 		{
-			public HackishVolatileClient(Volatile<IVolatileService> svc) { if (svc.Value != null) {} }
+			public HackishVolatileClient(IVolatile<IVolatileService> svc) { if (svc.Value != null) {} }
+		}
+		public class LeakingVolatileClient : ISingletonDependency
+		{
+			IVolatile<IVolatileService> _svc;
+			public LeakingVolatileClient(IVolatile<IVolatileService> svc) { _svc = svc; }
+			public IEnumerable<IVolatileService> Access()
+			{
+				return new[] { 1 }.Select(i => _svc.Value);
+			}
 		}
 		public class MyVolatileClient : ISingletonDependency
 		{
-			Volatile<IVolatileService> _svc;
-			public MyVolatileClient(Volatile<IVolatileService> svc) { _svc = svc; }
+			IVolatile<IVolatileService> _svc;
+			public MyVolatileClient(IVolatile<IVolatileService> svc) { _svc = svc; }
 			public IVolatileService Access() { return _svc.Value; }
 		}
 
@@ -39,7 +50,15 @@ namespace Autocore.Test.Integration
 		public void SingletonAccessesVolatileOutsideVolatileScope()
 		{
 			var client = _root.Resolve<MyVolatileClient>();
-			Assert.Throws<InvalidOperationException>(() => client.Access());
+			Assert.Throws<VolatileResolutionException>(() => client.Access());
+		}
+
+		[Test]
+		public void SingletonLeaksVolatileOutsideVolatileScope()
+		{
+			var client = _root.Resolve<LeakingVolatileClient>();
+			var list = _root.ExecuteInVolatileScope((scope) => client.Access());
+			Assert.Throws<VolatileResolutionException>(() => list.ToArray());
 		}
 
 		[Test]

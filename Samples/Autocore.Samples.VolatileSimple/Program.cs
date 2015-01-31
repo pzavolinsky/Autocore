@@ -26,8 +26,8 @@ namespace Autocore.Samples.VolatileSimple
 	}
 	public class PrintTimeOperation : IOperation
 	{
-		Volatile<IOperationStartTime> _time;
-		public PrintTimeOperation(Volatile<IOperationStartTime> time)
+		IVolatile<IOperationStartTime> _time;
+		public PrintTimeOperation(IVolatile<IOperationStartTime> time)
 		{
 			_time = time;
 		}
@@ -75,7 +75,7 @@ namespace Autocore.Samples.VolatileSimple
 					op.Work();
 					Console.WriteLine("Oops something went wrong, this line should not have executed");
 				}
-				catch (InvalidOperationException e)
+				catch (VolatileResolutionException e)
 				{
 					Console.WriteLine("Failed as expected: {0}", e.Message);
 				}

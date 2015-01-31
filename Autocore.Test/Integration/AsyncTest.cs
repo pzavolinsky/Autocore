@@ -19,8 +19,8 @@ namespace Autocore.Test.Integration
 		}
 		public class TextChecker : ITextChecker
 		{
-			Volatile<IText> _text;
-			public TextChecker(Volatile<IText> text)
+			IVolatile<IText> _text;
+			public TextChecker(IVolatile<IText> text)
 			{
 				_text = text;
 			}

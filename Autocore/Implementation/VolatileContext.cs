@@ -47,7 +47,7 @@ namespace Autocore.Implementation
 		{
 			if (_context.Container == null)
 			{
-				throw new InvalidOperationException("Attempted to access a volatile dependency outside a volatile scope. Consider wrapping this code in a call to IContainer.ExecuteInVolatileScope");
+				throw new VolatileResolutionException();
 			}
 			return _context.Container.Resolve<T>();
 		}
@@ -57,7 +57,7 @@ namespace Autocore.Implementation
 		{
 			if (_context.Container == null)
 			{
-				throw new InvalidOperationException("Attempted to access a volatile dependency outside a volatile scope. Consider wrapping this code in a call to IContainer.ExecuteInVolatileScope");
+				throw new VolatileResolutionException();
 			}
 			return _context.Container.ResolveEnumerable<T>();
 		}

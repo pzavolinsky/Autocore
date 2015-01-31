@@ -27,10 +27,10 @@ namespace Autocore.Samples.WebApi.Controllers
 	}
 	public class HelloMessage : IHelloMessage
 	{
-	    private readonly Volatile<IRandomGreeting> _greeting;
-	    private readonly Volatile<Tenant> _tenant;
+	    private readonly IVolatile<IRandomGreeting> _greeting;
+	    private readonly IVolatile<Tenant> _tenant;
 
-	    public HelloMessage(Volatile<IRandomGreeting> greeting, Volatile<Tenant> tenant)
+	    public HelloMessage(IVolatile<IRandomGreeting> greeting, IVolatile<Tenant> tenant)
 	    {
 	        _greeting = greeting;
 	        _tenant = tenant;

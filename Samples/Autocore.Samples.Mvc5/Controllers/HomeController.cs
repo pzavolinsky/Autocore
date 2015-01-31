@@ -26,8 +26,8 @@ namespace Autocore.Samples.Mvc5.Controllers
 	}
 	public class HelloMessage : IHelloMessage
 	{
-		Volatile<IRandomGreeting> _greeting;
-		public HelloMessage(Volatile<IRandomGreeting> greeting)
+		IVolatile<IRandomGreeting> _greeting;
+		public HelloMessage(IVolatile<IRandomGreeting> greeting)
 		{
 			_greeting = greeting;
 		}

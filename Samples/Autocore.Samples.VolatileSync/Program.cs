@@ -24,8 +24,8 @@ namespace Autocore.Samples.VolatileSync
 	}
 	public class UserGreeter : IUserGreeter
 	{
-		Volatile<IUser> _user;
-		public UserGreeter(Volatile<IUser> user)
+		IVolatile<IUser> _user;
+		public UserGreeter(IVolatile<IUser> user)
 		{
 			_user = user;
 		}
