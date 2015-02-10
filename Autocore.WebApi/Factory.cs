@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // 
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Autocore.Implementation;
@@ -50,17 +49,27 @@ namespace Autocore.WebApi
 		public static IContainer RegisterAutocore(this HttpConfiguration config, IEnumerable<Assembly> assemblies)
 		{
 			var asm = typeof(Factory).Assembly;
-			if (!assemblies.Contains(asm))
+			var asmList = assemblies.ToList();
+			if (!asmList.Contains(asm))
 			{
-				assemblies = assemblies.Concat(new Assembly[] { asm });
+				asmList.Add(asm);
 			}
+
 			var builder = new Autofac.ContainerBuilder();
-			builder.RegisterDependencyAssemblies(assemblies);
-			builder.RegisterApiControllers(assemblies.ToArray());
-			var scope = builder.Build();
+			builder.RegisterDependencyAssemblies(asmList);
+			builder.RegisterApiControllers(asmList.ToArray());
+
+			return RegisterAutocore(config, builder.Build());
+		}
+
+		/// <summary>
+		/// Registers Autocore into the WepApi configuration from the specified Autofac container (i.e. scope).
+		/// </summary>
+		public static IContainer RegisterAutocore(this HttpConfiguration config, ILifetimeScope scope)
+		{
 			var container = new Autocore.Implementation.Container(scope);
-			config.DependencyResolver = new AutofacWebApiDependencyResolver(scope);
-			config.Filters.Add(container.Resolve<VolatileActionFilter>());
+			config.DependencyResolver = container.Resolve<Autocore.WebApi.DependencyResolver>();
+			config.MessageHandlers.Add(container.Resolve<Autocore.WebApi.VolatileHandler>());
 			return container;
 		}
 	}

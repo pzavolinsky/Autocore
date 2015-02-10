@@ -62,9 +62,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DependencyResolver.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VolatileActionFilter.cs" />
+    <Compile Include="VolatileHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
