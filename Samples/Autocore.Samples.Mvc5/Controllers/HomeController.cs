@@ -50,13 +50,22 @@ namespace Autocore.Samples.Mvc5.Controllers
 	public class HomeController : Controller
 	{
 		IHelloMessage _hello;
-		public HomeController(IHelloMessage hello)
+		IRandomGreeting _greeting;
+
+		public HomeController(IHelloMessage hello, IRandomGreeting greeting)
 		{
 			_hello = hello;
+			_greeting = greeting;
 		}
 		public ActionResult Index()
 		{
-			ViewBag.Message = _hello.Message;
+			ViewBag.Message = string.Format(
+				"\n"+
+				"{0}\n"+
+				"\n"+
+				"Direct volatile greeting dependency says: {1}",
+				_hello.Message,
+				_greeting.Greeting);
 			return View();
 		}
 	}

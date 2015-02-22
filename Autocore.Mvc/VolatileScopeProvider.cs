@@ -21,54 +21,30 @@
 // SOFTWARE.
 // 
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Web.Mvc;
 using Autocore.Implementation;
 using Autofac;
 using Autofac.Integration.Mvc;
-using System.Linq;
 
 namespace Autocore.Mvc
 {
 	/// <summary>
-	/// Factory façade.
+	/// Volatile scope provider.
 	/// </summary>
-	public static class Factory
+	public class VolatileScopeProvider : RequestLifetimeScopeProvider
 	{
 		/// <summary>
-		/// Creates a root container loading dependencies from the specified assemblies.
+		/// Initializes a new instance of the <see cref="Autocore.Mvc.VolatileScopeProvider"/> class.
 		/// </summary>
-		public static IContainer Create(params Assembly[] assemblies)
-		{
-			return Create((IEnumerable<Assembly>)assemblies);
-		}
+		/// <param name="container">Container.</param>
+		public VolatileScopeProvider(ILifetimeScope container) : base(container) {}
 
-		/// <summary>
-		/// Creates a root container loading dependencies from the specified assemblies.
-		/// </summary>
-		public static IContainer Create(IEnumerable<Assembly> assemblies)
+		/// <see cref="RequestLifetimeScopeProvider.GetLifetimeScopeCore"/> class.
+		protected override ILifetimeScope GetLifetimeScopeCore(Action<ContainerBuilder> configurationAction)
 		{
-			var asm = typeof(Factory).Assembly;
-			if (!assemblies.Contains(asm))
-			{
-				assemblies = assemblies.Concat(new Assembly[] { asm });
-			}
-			var builder = new Autofac.ContainerBuilder();
-			builder.RegisterDependencyAssemblies(assemblies);
-			builder.RegisterControllers(assemblies.ToArray());
-
-			return CreateFromScope(builder.Build());
-		}
-
-		/// <summary>
-		/// Registers Autocore into MVC from the specified Autofac container (i.e. scope).
-		/// </summary>
-		public static IContainer CreateFromScope(ILifetimeScope scope)
-		{
-			var container = new Autocore.Implementation.Container(scope);
-			DependencyResolver.SetResolver(new AutofacDependencyResolver(scope, new VolatileScopeProvider(scope)));
-			return container;
+			var scope = base.GetLifetimeScopeCore(configurationAction);
+			var vs = (Autocore.Implementation.VolatileContainer) new Autocore.Implementation.Container(scope).CreateVolatileScope();
+			vs.Resolve<ImplicitContext>().Container = vs;
+			return vs.Scope;
 		}
 	}
 }
